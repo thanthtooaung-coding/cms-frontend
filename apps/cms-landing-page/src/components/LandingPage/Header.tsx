@@ -20,36 +20,40 @@ const Header = () => {
   const handleClick = (id: string) => {
     setActiveLink(id);
     setMobileOpen(false);
-  };
-
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    if (!activeLink) return;
-    const element = document.getElementById(activeLink);
+    const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activeLink]);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 100;
+      setScrolled(window.scrollY > 20);
+
+      for (const item of navItems) {
+        const element = document.getElementById(item.id);
+        if (element) {
+          if (element.offsetTop <= scrollPosition && element.offsetTop + element.offsetHeight > scrollPosition) {
+            setActiveLink(item.id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
  
 
   return (
     <nav
-      className="
-        sticky top-0 w-full z-50
-        bg-transparent backdrop-blur
-        px-6 md:px-8 py-3
-        scroll-smooth
-      "
-
+      className={cn(
+        'sticky top-0 w-full z-50 px-6 md:px-8 py-3 transition-all duration-300',
+        scrolled ? 'bg-transparent backdrop-blur-sm' : 'bg-transparent'
+      )}
     >
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         {/* Logo */}
@@ -85,9 +89,9 @@ const Header = () => {
         <div className="hidden md:block">
           <Button
             onClick={() => navigate('/onboarding')}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
           >
-            Get Started
+            Register
           </Button>
         </div>
 

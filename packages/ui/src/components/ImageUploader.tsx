@@ -166,7 +166,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
               type="button"
               variant="destructive"
               size="icon"
-              className="absolute top-2 right-2"
+              className="absolute top-2 right-2 cursor-pointer"
               onClick={clearFile}
               aria-label="Remove image"
             >
