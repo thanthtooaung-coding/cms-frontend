@@ -4,5 +4,5 @@ export type PageRequestPayload = {
     title: string;
     pageDescription: string;
     pageUrl: string;
-    pageLogo: File;
+    logoUrl: string;
 };

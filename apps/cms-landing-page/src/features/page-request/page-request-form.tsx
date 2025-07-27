@@ -23,7 +23,7 @@ import {
 } from '@cms/ui/components/form';
 import { ImageUploader } from '@cms/ui/components/ImageUploader';
 import { useMutation } from '@tanstack/react-query';
-import { createPageRequest } from '@cms/data';
+import { createPageRequest, uploadFile } from '@cms/data';
 import { Alert, AlertTitle, AlertDescription } from '@cms/ui/components/alert';
 import { useState } from 'react';
 
@@ -61,7 +61,25 @@ export default function PageRequestForm() {
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: createPageRequest,
+    mutationFn: async (data: PageRequestFormData) => {
+      const uploadResponse = await uploadFile(data.pageLogo);
+      
+      const logoUrl = uploadResponse.url;
+
+      if (!logoUrl) {
+        throw new Error('File upload succeeded, but no URL was returned.');
+      }
+
+      const pageRequestPayload = {
+        requestType: data.requestType,
+        title: data.title,
+        pageDescription: data.pageDescription,
+        pageUrl: data.pageUrl,
+        logoUrl: logoUrl,
+      };
+
+      return createPageRequest(pageRequestPayload);
+    },
     onSuccess: (data: any) => {
       setErrorMessage(null);
       setSuccessMessage(data.message || 'Page request submitted successfully!');
@@ -197,7 +215,6 @@ export default function PageRequestForm() {
                 control={form.control}
                 render={({ field }) => {
                   const handleChange = (file: File | string | null) => {
-                    console.log('Controller onChange called with:', file);
                     field.onChange(file ?? null);
                     field.onBlur();
                   };
