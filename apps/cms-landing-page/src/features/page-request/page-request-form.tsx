@@ -1,9 +1,8 @@
-'use client';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router';
-import { ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Input } from '@cms/ui/components/input';
 import { Textarea } from '@cms/ui/components/textarea';
 import { Button } from '@cms/ui/components/button';
@@ -23,43 +22,61 @@ import {
   FormMessage,
 } from '@cms/ui/components/form';
 import { ImageUploader } from '@cms/ui/components/ImageUploader';
-//Validation schema for the form
+import { useMutation } from '@tanstack/react-query';
+import { createPageRequest } from '@cms/data';
+import { Alert, AlertTitle, AlertDescription } from '@cms/ui/components/alert';
+import { useState } from 'react';
+
 const schema = z.object({
-  pageType: z.enum(['1', '2', '3'], { required_error: 'Page type is required' }),
-  pageTitle: z.string().min(1, 'Page title is required'),
+  requestType: z.enum([
+    'Learning Management System',
+    'E-Commerce System',
+    'Booking System',
+    'Agency Management System',
+  ]),
+  title: z.string().min(1, 'Page title is required'),
   pageDescription: z.string().min(1, 'Page description is required'),
-  pageLink: z.string().url('Must be a valid URL'),
+  pageUrl: z.string().url('Must be a valid URL'),
   pageLogo: z
     .instanceof(File, { message: 'Logo image is required' })
     .refine((file) => file.size <= 5 * 1024 * 1024, {
       message: 'Logo must be under 5MB',
     }),
 });
-// TypeScript type for the form data
+
 type PageRequestFormData = z.infer<typeof schema>;
-// PageRequestForm component
+
 export default function PageRequestForm() {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const form = useForm<PageRequestFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      pageType: '1',
-      pageTitle: '',
+      requestType: 'Learning Management System',
+      title: '',
       pageDescription: '',
-      pageLink: '',
+      pageUrl: '',
       pageLogo: undefined as any,
     },
   });
-  // Handle form submission
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createPageRequest,
+    onSuccess: (data: any) => {
+      setErrorMessage(null);
+      setSuccessMessage(data.message || 'Page request submitted successfully!');
+      form.reset();
+    },
+    onError: (error: any) => {
+      setSuccessMessage(null);
+      const message = error?.response?.data?.message || 'An unexpected error occurred. Please try again.';
+      setErrorMessage(message);
+    },
+  });
+
   const onSubmit = (data: PageRequestFormData) => {
-    console.log('Form submitted:', data);
-    // Reset form fields to default values
-    form.reset({
-      pageType: '1',
-      pageTitle: '',
-      pageDescription: '',
-      pageLink: '',
-      pageLogo: undefined as any,
-    });
+    setErrorMessage(null);
+    mutate(data);
   };
 
   return (
@@ -85,36 +102,42 @@ export default function PageRequestForm() {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {successMessage && (
+                <Alert variant="success">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertTitle>Success!</AlertTitle>
+                  <AlertDescription>{successMessage}</AlertDescription>
+                </Alert>
+              )}
+              {errorMessage && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Submission Failed</AlertTitle>
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
               {/* Page Type */}
               <FormField
                 control={form.control}
-                name="pageType"
+                name="requestType"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Page Type</FormLabel>
                     <FormControl>
-                      {/* <select
-                        {...field}
-                        className="w-full h-12 border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 "
-                      >
-                        <option value="">Select a page type</option>
-                        <option value="1">Learning Management System</option>
-                        <option value="2">E-Commerce System</option>
-                        <option value="3">Point of Sales System</option>
-                      </select> */}
-
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        disabled={isPending}
                       >
                         <SelectTrigger className="w-full h-12 border rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500">
                           <SelectValue placeholder="Select a page type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1">Learning Management System</SelectItem>
-                          <SelectItem value="2">E-Commerce System</SelectItem>
-                          <SelectItem value="3">Point of Sales System</SelectItem>
+                          <SelectItem value="Learning Management System">Learning Management System</SelectItem>
+                          <SelectItem value="E-Commerce System">E-Commerce System</SelectItem>
+                          <SelectItem value="Booking System">Booking System</SelectItem>
+                          <SelectItem value="Agency Management System">Agency Management System</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -126,12 +149,12 @@ export default function PageRequestForm() {
               {/* Page Title */}
               <FormField
                 control={form.control}
-                name="pageTitle"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Page Title</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter the title" />
+                      <Input {...field} placeholder="Enter the title" disabled={isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -146,7 +169,7 @@ export default function PageRequestForm() {
                   <FormItem>
                     <FormLabel>Page Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Describe your page..." rows={4} />
+                      <Textarea {...field} placeholder="Describe your page..." rows={4} disabled={isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -156,12 +179,12 @@ export default function PageRequestForm() {
               {/* Page Link */}
               <FormField
                 control={form.control}
-                name="pageLink"
+                name="pageUrl"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Page Link</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://example.com" />
+                      <Input {...field} placeholder="https://example.com" disabled={isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,8 +213,8 @@ export default function PageRequestForm() {
               />
 
               {/* Submit */}
-              <Button type="submit" className="w-full h-12">
-                Submit Request
+              <Button type="submit" className="w-full h-12" disabled={isPending}>
+                {isPending ? 'Submitting...' : 'Submit Request'}
               </Button>
             </form>
           </Form>
