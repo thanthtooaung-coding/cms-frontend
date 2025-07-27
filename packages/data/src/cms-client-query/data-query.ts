@@ -19,10 +19,25 @@ export const createPageRequest = async (data: PageRequestPayload) => {
   formData.append('title', data.title);
   formData.append('pageDescription', data.pageDescription);
   formData.append('pageUrl', data.pageUrl);
-  formData.append('pageLogo', data.pageLogo);
+  formData.append('logoUrl', data.logoUrl);
 
   return (
-    await client.post('/page-request', formData, {
+    await client.post('/cms/page-request', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  ).data;
+};
+
+export const uploadFile = async (file: File) => {
+  const client = getApiClient();
+  const formData = new FormData();
+
+  formData.append('file', file); 
+
+  return (
+    await client.post('/file/file/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
