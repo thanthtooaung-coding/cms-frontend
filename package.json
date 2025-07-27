@@ -1,0 +1,55 @@
+{
+  "name": "cms",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "commit": "cz-customizable",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "volta:install": "curl https://get.volta.sh | bash",
+    "ui": "pnpm --filter @cms/ui ui"
+  },
+  "devDependencies": {
+    "@originjs/vite-plugin-federation": "^1.4.1",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "cz-customizable": "^7.4.0",
+    "eslint": "^9.30.0",
+    "eslint-config-prettier": "^10.1.5",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.4",
+    "typescript": "5.8.3"
+  },
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-icons": "^1.3.2",
+    "@tabler/icons-react": "^3.34.0",
+    "@tanstack/react-query": "^5.81.5",
+    "@tanstack/react-query-devtools": "^4.36.1",
+    "@tanstack/react-table": "^8.21.3",
+    "@types/axios": "^0.14.4",
+    "@types/js-cookie": "^3.0.6",
+    "axios": "^1.10.0",
+    "framer-motion": "^12.23.0",
+    "immer": "^10.1.1",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.525.0",
+    "react-hook-form": "^7.60.0",
+    "react-hot-toast": "^2.5.2",
+    "react-router": "^7.6.3",
+    "react-router-dom": "^7.6.3",
+    "react-top-loading-bar": "^3.0.2",
+    "sooner": "^1.1.4",
+    "zod": "^3.25.67",
+    "zustand": "^5.0.6"
+  }
+}

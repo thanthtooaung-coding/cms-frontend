@@ -1,0 +1,15 @@
+{
+  "extends": "@repo/typescript-config/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "module": "nodenext",
+    "composite": true,
+    "declaration": true,
+    "incremental": true,
+    "paths": {
+      "@cms/data": ["../../packages/data/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}
