@@ -36,28 +36,7 @@ export function ProfileDropdown() {
             <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to="/settings">
-              Profile
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/settings">
-              Billing
-              <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/settings">
-              Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
-        </DropdownMenuGroup>
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Form method="POST" action="/logout">

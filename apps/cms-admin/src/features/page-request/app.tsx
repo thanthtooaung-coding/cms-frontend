@@ -2,17 +2,27 @@ import { Header } from '../../components/Layout/Header';
 import { Main } from '../../components/Layout/main';
 import { ProfileDropdown } from '../../components/profile-dropdown';
 import { Search } from '../../components/search';
-import { mockPageRequests } from './data/mockData';
 import { DataTable } from './components/data-table';
 import columns from './components/column';
 import { PageRequestProvider } from './context/page-request-context';
 import { PageRequestDialogs } from './actions/page-request-dialog';
 import { fetchPageRequestsQuery } from '@cms/data';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { ApiPageRequestSchema, type PageRequestType } from './data/schema';
 
 const PageRequestApp = () => {
   const { data: pageRequestsList } = useSuspenseQuery(fetchPageRequestsQuery());
-  const data = pageRequestsList.data || mockPageRequests;
+  const validatedData = ApiPageRequestSchema.array().parse(pageRequestsList.data);
+
+  const formattedData: PageRequestType[] = validatedData.map((item) => ({
+    id: item.id.toString(),
+    pageName: item.title,
+    pageUrl: item.pageUrl,
+    userName: item.userName,
+    userEmail: item.userEmail,
+    requestDate: new Date(item.createdAt).toLocaleDateString(),
+  }));
+
   return (
     <PageRequestProvider>
       <Header>
@@ -32,7 +42,7 @@ const PageRequestApp = () => {
           </div>
 
           <div>
-            <DataTable data={data} columns={columns} />
+            <DataTable data={formattedData} columns={columns} />
           </div>
         </div>
       </Main>
