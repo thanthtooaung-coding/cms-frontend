@@ -7,6 +7,7 @@ import { DataTableRowActions } from './data-table-row-actions';
 import { Checkbox } from '@cms/ui/components/checkbox';
 import type { PageRequestType } from '../data/schema';
 import { Link } from 'react-router';
+import { Badge } from '@cms/ui/components/badge';
 
 export const columns: ColumnDef<PageRequestType>[] = [
   {
@@ -83,6 +84,21 @@ export const columns: ColumnDef<PageRequestType>[] = [
         'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
         'sticky left-16 z-10'
       ),
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => {
+      const { status } = row.original;
+      const variant =
+        status === 'Approved' ? 'success' : status === 'Pending' ? 'warning' : 'destructive';
+
+      return (
+        <Badge variant={variant} className="capitalize">
+          {status}
+        </Badge>
+      );
     },
   },
   {

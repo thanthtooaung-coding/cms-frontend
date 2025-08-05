@@ -21,6 +21,7 @@ const PageRequestApp = () => {
     userName: item.userName,
     userEmail: item.userEmail,
     requestDate: new Date(item.createdAt).toLocaleDateString(),
+    status: item.status,
   }));
 
   return (

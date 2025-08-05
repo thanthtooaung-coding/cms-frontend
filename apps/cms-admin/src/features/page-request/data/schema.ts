@@ -7,6 +7,7 @@ export interface PageRequestType {
   userName: string;
   userEmail: string;
   requestDate: string;
+  status: string;
 }
 
 export const PageRequestSchema = z.object({
@@ -16,6 +17,7 @@ export const PageRequestSchema = z.object({
   userName: z.string(),
   userEmail: z.string(),
   requestDate: z.string(),
+  status: z.string(),
 });
 
 export const ApiPageRequestSchema = z.object({

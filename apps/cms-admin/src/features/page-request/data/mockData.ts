@@ -6,6 +6,7 @@ export const mockPageRequests = [
     userName: 'Alice Johnson',
     userEmail: 'alice.johnson@example.com',
     requestDate: '2025-07-09',
+    status: 'Approved',
   },
   {
     id: '2',
@@ -14,6 +15,7 @@ export const mockPageRequests = [
     userName: 'Bob Smith',
     userEmail: 'bob.smith@example.com',
     requestDate: '2025-07-08',
+    status: 'Pending',
   },
   {
     id: '3',
@@ -22,6 +24,7 @@ export const mockPageRequests = [
     userName: 'Catherine Lee',
     userEmail: 'catherine.lee@example.com',
     requestDate: '2025-07-07',
+    status: 'Rejected',
   },
   {
     id: '4',
@@ -30,6 +33,7 @@ export const mockPageRequests = [
     userName: 'David Chen',
     userEmail: 'david.chen@example.com',
     requestDate: '2025-07-06',
+    status: 'Approved',
   },
   {
     id: '5',
@@ -38,6 +42,7 @@ export const mockPageRequests = [
     userName: 'Eva Martinez',
     userEmail: 'eva.martinez@example.com',
     requestDate: '2025-07-05',
+    status: 'Pending',
   },
   {
     id: '6',
@@ -46,6 +51,7 @@ export const mockPageRequests = [
     userName: 'Frank Wilson',
     userEmail: 'frank.wilson@example.com',
     requestDate: '2025-07-04',
+    status: 'Rejected',
   },
   {
     id: '7',
@@ -54,6 +60,7 @@ export const mockPageRequests = [
     userName: 'Grace Kim',
     userEmail: 'grace.kim@example.com',
     requestDate: '2025-07-03',
+    status: 'Approved',
   },
   {
     id: '8',
@@ -62,6 +69,7 @@ export const mockPageRequests = [
     userName: 'Henry Thompson',
     userEmail: 'henry.thompson@example.com',
     requestDate: '2025-07-02',
+    status: 'Pending',
   },
   {
     id: '9',
@@ -70,6 +78,7 @@ export const mockPageRequests = [
     userName: 'Isabella Nguyen',
     userEmail: 'isabella.nguyen@example.com',
     requestDate: '2025-07-01',
+    status: 'Rejected',
   },
   {
     id: '10',
@@ -78,5 +87,6 @@ export const mockPageRequests = [
     userName: 'Jack Patel',
     userEmail: 'jack.patel@example.com',
     requestDate: '2025-06-30',
+    status: 'Approved',
   },
 ];
