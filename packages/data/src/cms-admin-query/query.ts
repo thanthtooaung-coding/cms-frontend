@@ -23,6 +23,22 @@ export const fetchPagesQuery = () => ({
   queryFn: getPages,
 });
 
+export const updatePageStatus = async (data: {
+  pageId: number;
+  status: 'Draft' | 'Published' | 'Archived';
+}) => {
+  console.log(data);
+  
+  const api = getApiClient();
+  return (
+    await api.patch('/pages/status', {
+      userId: 1,
+      pageId: data.pageId,
+      status: data.status,
+    })
+  ).data;
+};
+
 //page-requests
 
 export const getPageRequests = async () => {
