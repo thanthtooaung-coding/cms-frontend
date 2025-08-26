@@ -10,9 +10,21 @@ import { PageListProvider } from './context/page-list-context';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { fetchPagesQuery } from '@cms/data';
 import { mockPages } from './data/mockData';
+import { ApiPageSchema, type PageList } from './data/schema';
 
 const PageListsApp = () => {
   const { data: pageList } = useSuspenseQuery(fetchPagesQuery());
+
+  const validatedData = ApiPageSchema.array().parse(pageList.data || []);
+
+  const formattedData: PageList[] = (validatedData || []).map((item) => ({
+    id: item.id.toString(),
+    pageName: item.title,
+    pageUrl: item.pageUrl || `/page/${item.id}`,
+    ownerName: item.owner.username,
+    ownerEmail: item.owner.email,
+    pageStatus: item.status,
+  }));
 
   const data = pageList.data || mockPages;
   return (
@@ -34,7 +46,7 @@ const PageListsApp = () => {
           </div>
 
           <div>
-            <DataTable data={data} columns={columns} />
+            <DataTable data={formattedData} columns={columns} />
             <PageListDialogs />
           </div>
         </div>

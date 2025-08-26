@@ -5,7 +5,7 @@ import path from 'node:path';
 // https://vite.dev/config/
 export default defineConfig({
   server: {
-    port: 5175,
+    port: 5173,
     cors: true,
   },
   plugins: [react()],

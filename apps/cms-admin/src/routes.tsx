@@ -63,11 +63,11 @@ export const router = createBrowserRouter([
         element: withSuspense(Report),
       },
       {
-        path: '/userListing',
+        path: '/report/userListing',
         element: withSuspense(userListing),
       },
       {
-        path: 'page-list',
+        path: '/page-list',
         element: withSuspense(PageList),
         loader: PageLoader,
       },

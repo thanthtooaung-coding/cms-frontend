@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ConfirmDialog } from '@cms/ui/components/comfirm-dialog';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { Label } from '@cms/ui/components/label';
 import { Alert, AlertDescription, AlertTitle } from '@cms/ui/components/alert';
 import { Loader2 } from 'lucide-react';
+import { updatePageStatus } from '@cms/data';
 
 interface Props {
   open: boolean;
@@ -13,19 +15,19 @@ interface Props {
 
 const statusOptions = [
   {
-    value: 'published',
+    value: 'Published',
     label: 'Published',
     color: 'blue',
     description: 'The page is live and visible to the public.',
   },
   {
-    value: 'archived',
+    value: 'Archived',
     label: 'Archived',
     color: 'blue',
     description: 'The page is no longer active but stored for reference.',
   },
   {
-    value: 'draft',
+    value: 'Draft',
     label: 'Draft',
     color: 'blue',
     description: 'The page is in progress and not visible to the public.',
@@ -34,41 +36,46 @@ const statusOptions = [
 
 export function PageStatusChangeDialog({ open, onOpenChange, currentRow }: Props) {
   const [selectedOption, setSelectedOption] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [initialStatus, setInitialStatus] = useState<string>("");
+  const [initialStatus, setInitialStatus] = useState<string>('');
+  const queryClient = useQueryClient();
 
+  const mutation = useMutation({
+    mutationFn: updatePageStatus,
+    onSuccess: () => {
+      console.log('Page status updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['pages'] });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      console.error('Update error:', error);
+    },
+  });
 
   useEffect(() => {
     if (open && currentRow?.pageStatus) {
-      setSelectedOption(currentRow.pageStatus.toLowerCase());
-      setInitialStatus(currentRow.pageStatus.toLowerCase());
+      setSelectedOption(currentRow.pageStatus);
+      setInitialStatus(currentRow.pageStatus);
     }
   }, [open, currentRow]);
 
-  const handleSave = async (id: string) => {
-    try {
-      setIsSubmitting(true);
-      if (!selectedOption) return;
+  const handleSave = () => {
+    if (!selectedOption || !currentRow) return;
 
-      console.log('Saving status change:', selectedOption, 'for page ID:', id);
-
-      onOpenChange(false); 
-    } catch (error) {
-      console.error('Save error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    mutation.mutate({
+      pageId: parseInt(currentRow.id, 10),
+      status: selectedOption as 'Draft' | 'Published' | 'Archived',
+    });
   };
 
   return (
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      handleConfirm={() => handleSave(currentRow.id)}
-      disabled={selectedOption === '' || selectedOption === initialStatus}
-      isLoading={isSubmitting}
+      handleConfirm={handleSave}
+      disabled={selectedOption === '' || selectedOption === initialStatus || mutation.isPending}
+      isLoading={mutation.isPending}
       confirmText={
-        isSubmitting ? (
+        mutation.isPending ? (
           <span className="flex items-center space-x-2">
             <Loader2 className="animate-spin w-4 h-4" />
             <span>Saving...</span>
@@ -77,8 +84,6 @@ export function PageStatusChangeDialog({ open, onOpenChange, currentRow }: Props
           'Save'
         )
       }
-      //className="bg-white rounded-2xl shadow-2xl p-8 max-w-xl mx-auto border border-gray-200"
-      //confirmButtonClass="bg-blue-600 text-white py-3 px-8 rounded-md shadow-md hover:bg-blue-700 focus:outline-none transition-all disabled:opacity-60"
       cancelButtonClass="bg-gray-100 text-gray-700 py-3 px-8 rounded-md hover:bg-gray-200 focus:outline-none transition-all"
       title={
         <div className="flex items-center text-gray-900 text-xl font-bold space-x-2">
@@ -121,12 +126,8 @@ export function PageStatusChangeDialog({ open, onOpenChange, currentRow }: Props
                   className="mt-1 accent-current"
                 />
                 <div>
-                  <span className="text-md font-medium text-gray-900">
-                    {option.label}
-                  </span>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {option.description}
-                  </p>
+                  <span className="text-md font-medium text-gray-900">{option.label}</span>
+                  <p className="text-sm text-gray-600 mt-1">{option.description}</p>
                 </div>
               </label>
             ))}
@@ -146,4 +147,3 @@ export function PageStatusChangeDialog({ open, onOpenChange, currentRow }: Props
     />
   );
 }
-

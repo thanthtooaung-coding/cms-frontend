@@ -1,7 +1,7 @@
 import {z} from 'zod'
 
 export interface PageList {
-    id : string  
+    id : string
     pageName: string;
     pageUrl: string;
     ownerName: string;
@@ -16,4 +16,15 @@ export const PageListSchema = z.object({
     ownerName: z.string(),
     ownerEmail: z.string(),
     pageStatus: z.string()
+});
+
+export const ApiPageSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  pageUrl: z.string().optional(),
+  status: z.string(),
+  owner: z.object({
+    username: z.string(),
+    email: z.string(),
+  }),
 });

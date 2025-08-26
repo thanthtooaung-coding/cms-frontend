@@ -46,7 +46,7 @@ export const columns: ColumnDef<ReportType>[] = [
             {row.original.name}
           </span> */}
           <Link
-            to={`/userListing`} // Adjust path & param as needed
+            to={`/report/userListing`}
             className="font-semibold text-base leading-tight max-w-48 text-blue-600 hover:underline cursor-pointer"
           >
             {row.original.name}

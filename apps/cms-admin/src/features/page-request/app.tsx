@@ -12,9 +12,9 @@ import { ApiPageRequestSchema, type PageRequestType } from './data/schema';
 
 const PageRequestApp = () => {
   const { data: pageRequestsList } = useSuspenseQuery(fetchPageRequestsQuery());
-  const validatedData = ApiPageRequestSchema.array().parse(pageRequestsList.data);
+  const validatedData = ApiPageRequestSchema.array().parse(pageRequestsList.data || []);
 
-  const formattedData: PageRequestType[] = validatedData.map((item) => ({
+  const formattedData: PageRequestType[] = (validatedData || []).map((item) => ({
     id: item.id.toString(),
     pageName: item.title,
     pageUrl: item.pageUrl,

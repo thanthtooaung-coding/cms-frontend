@@ -32,7 +32,7 @@ const OwnerApp = () => {
           </div>
 
           <div>
-            <DataTable data={ownerData.data} columns={columns} />
+            <DataTable data={ownerData.data || []} columns={columns} />
           </div>
         </div>
       </Main>
