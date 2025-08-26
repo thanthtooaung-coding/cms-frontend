@@ -33,3 +33,17 @@ export const fetchPageRequestsQuery = () => ({
   queryKey: ['page-requests'] as const,
   queryFn: getPageRequests,
 });
+
+export const updatePageRequestStatus = async (data: {
+  requestId: number;
+  status: 'Approved' | 'Rejected';
+}) => {
+  const api = getApiClient();
+  return (
+    await api.put('/page-request/status', {
+      userId: 1,
+      requestId: data.requestId,
+      status: data.status,
+    })
+  ).data;
+};

@@ -1,0 +1,30 @@
+import {z} from 'zod'
+
+export interface PageList {
+    id : string
+    pageName: string;
+    pageUrl: string;
+    ownerName: string;
+    ownerEmail: string;
+    pageStatus: string;
+}
+
+export const PageListSchema = z.object({
+    id: z.string(),
+    pageName: z.string(),
+    pageUrl: z.string(),
+    ownerName: z.string(),
+    ownerEmail: z.string(),
+    pageStatus: z.string()
+});
+
+export const ApiPageSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  pageUrl: z.string().optional(),
+  status: z.string(),
+  owner: z.object({
+    username: z.string(),
+    email: z.string(),
+  }),
+});
