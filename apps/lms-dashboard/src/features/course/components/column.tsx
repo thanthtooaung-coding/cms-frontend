@@ -1,10 +1,9 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import { cn } from '@cms/ui/lib/utils';
-//import { Hash } from 'lucide-react';
 import { DataTableColumnHeader } from '@cms/ui/components/data-table-column-header';
 import { DataTableRowActions } from './data-table-row-actions';
 import { Checkbox } from '@cms/ui/components/checkbox';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import type { Course } from '../data/schema';
 
 const slugify = (str : string) => str.toLowerCase().replace(/\s+/g, '-');
@@ -63,9 +62,9 @@ export const columns: ColumnDef<Course>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <div className="flex flex-col gap-1 min-w-0">
-          <span className="font-semibold text-base break-words whitespace-normal leading-tight max-w-48">
+        <Link to={`/course/${row.original.id}`} className="font-semibold text-base break-words whitespace-normal leading-tight max-w-48 text-blue-600 hover:underline">
             {row.original.title}
-          </span>
+          </Link>
         </div>
       </div>
     ),
@@ -107,7 +106,7 @@ export const columns: ColumnDef<Course>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <Link
-          to={slugify(row.original.category)}
+          to={`/category/${slugify(row.original.category)}`}
           className="text-base leading-tight max-w-48 text-blue-600 hover:underline break-words"
         >
           <span className=" text-base leading-tight max-w-48">{row.original.category}</span>
@@ -115,13 +114,6 @@ export const columns: ColumnDef<Course>[] = [
       </div>
     ),
     size: 300,
-    // meta: {
-    //   className: cn(
-    //     'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)] lg:drop-shadow-none',
-    //     'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
-    //     'sticky left-16 z-10'
-    //   ),
-    // },
   },
   {
     accessorKey: 'instructor',
@@ -129,7 +121,7 @@ export const columns: ColumnDef<Course>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <Link
-          to={slugify(row.original.instructor)}
+          to={`/instructor/${slugify(row.original.instructor)}`}
           className="text-base leading-tight max-w-48 text-blue-600 hover:underline "
         >
           <span className=" text-base leading-tight max-w-48">{row.original.instructor}</span>
@@ -143,16 +135,6 @@ export const columns: ColumnDef<Course>[] = [
     accessorKey: 'status',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) =>
-      // <div className="flex items-center gap-3">
-      //   <div className="flex flex-col gap-1 min-w-0">
-      //     <span className=" text-base leading-tight max-w-48">{row.original.status}</span>
-      //   </div>
-      // </div>
-      // <div className="flex items-center gap-3 bg-blue-100 hover:bg-blue-200 transition-colors duration-200">
-      //   <div className="flex flex-col gap-1 min-w-0">
-      //     <span className="text-base leading-tight max-w-48">{row.original.status}</span>
-      //   </div>
-      // </div>
       {
         const status = row.original.status;
         const bgColor =
@@ -171,20 +153,6 @@ export const columns: ColumnDef<Course>[] = [
       },
 
     size: 300,
-    // meta: {
-    //   className: cn(
-    //     'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)] lg:drop-shadow-none',
-    //     'bg-background transition-colors duration-200 group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted',
-    //     'sticky left-16 z-10'
-    //   ),
-    // },
-    // meta: {
-    //   className: cn(
-    //     'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)] lg:drop-shadow-none',
-    //     'bg-blue-100 transition-colors duration-200 group-hover/row:bg-blue-200 group-data-[state=selected]/row:bg-blue-300',
-    //     'sticky left-16 z-10'
-    //   ),
-    // },
   },
 
   {

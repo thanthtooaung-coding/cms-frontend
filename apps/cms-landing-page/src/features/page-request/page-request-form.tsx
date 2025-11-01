@@ -29,7 +29,7 @@ import { useState } from 'react';
 
 const schema = z.object({
   requestType: z.enum([
-    'Learning Management System',
+    'LMS',
     'E-Commerce System',
     'Booking System',
     'Agency Management System',
@@ -52,7 +52,7 @@ export default function PageRequestForm() {
   const form = useForm<PageRequestFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      requestType: 'Learning Management System',
+      requestType: 'LMS',
       title: '',
       pageDescription: '',
       pageUrl: '',
@@ -152,7 +152,7 @@ export default function PageRequestForm() {
                           <SelectValue placeholder="Select a page type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Learning Management System">Learning Management System</SelectItem>
+                          <SelectItem value="LMS">Learning Management System</SelectItem>
                           <SelectItem value="E-Commerce System">E-Commerce System</SelectItem>
                           <SelectItem value="Booking System">Booking System</SelectItem>
                           <SelectItem value="Agency Management System">Agency Management System</SelectItem>
