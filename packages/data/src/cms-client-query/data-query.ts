@@ -14,7 +14,7 @@ export const FetchPostQuery = () => ({
 export const createPageRequest = async (data: PageRequestPayload) => {
   const client = getApiClient();
   const formData = new FormData();
-  formData.append('ownerId', '1');
+  formData.append('ownerId', '2');
   formData.append('requestType', data.requestType);
   formData.append('title', data.title);
   formData.append('pageDescription', data.pageDescription);

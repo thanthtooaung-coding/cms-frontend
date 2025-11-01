@@ -25,7 +25,7 @@ import { ImageUploader } from '@cms/ui/components/ImageUploader';
 import { useMutation } from '@tanstack/react-query';
 import { createPageRequest, uploadFile } from '@cms/data';
 import { Alert, AlertTitle, AlertDescription } from '@cms/ui/components/alert';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const schema = z.object({
   requestType: z.enum([
@@ -59,6 +59,33 @@ export default function PageRequestForm() {
       pageLogo: undefined as any,
     },
   });
+
+  const watchedTitle = form.watch('title');
+  const watchedRequestType = form.watch('requestType');
+
+  useEffect(() => {
+    if (watchedRequestType === 'LMS') {
+      const sanitizedTitle = watchedTitle.trim().toLowerCase().replace(/\s+/g, '-');
+      form.setValue('pageUrl', `http://localhost:5176/lms/${sanitizedTitle}`, {
+        shouldValidate: true,
+      });
+    } else if (watchedRequestType === 'E-Commerce System') {
+      const sanitizedTitle = watchedTitle.replace(/\s+/g, '');
+      form.setValue('pageUrl', `http://localhost:5178/ecommerce/${sanitizedTitle}`, {
+        shouldValidate: true,
+      });
+    } else if (watchedRequestType === 'Booking System') {
+      const sanitizedTitle = watchedTitle.replace(/\s+/g, '');
+      form.setValue('pageUrl', `http://localhost:5180/booking/${sanitizedTitle}`, {
+        shouldValidate: true,
+      });
+    } else if (watchedRequestType === 'Agency Management System') {
+      const sanitizedTitle = watchedTitle.replace(/\s+/g, '');
+      form.setValue('pageUrl', `http://localhost:5182/agency/${sanitizedTitle}`, {
+        shouldValidate: true,
+      });
+    }
+  }, [watchedTitle, watchedRequestType, form.setValue]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: PageRequestFormData) => {

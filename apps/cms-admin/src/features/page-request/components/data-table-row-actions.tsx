@@ -83,14 +83,21 @@ export function DataTableRowActions<TData>({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[160px]">
-          <DropdownMenuItem onClick={handleApprove}>
+          <DropdownMenuItem 
+            onClick={handleApprove}
+            disabled={pageRequest.status === 'Approved'}
+          >
             Approve
             <DropdownMenuShortcut className="cursor-pointer">
               <IconCheck size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem variant="destructive" onClick={handleReject}>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={handleReject}
+            disabled={pageRequest.status === 'Rejected'}
+          >
             Reject
             <DropdownMenuShortcut className="cursor-pointer">
               <IconX size={16} />
