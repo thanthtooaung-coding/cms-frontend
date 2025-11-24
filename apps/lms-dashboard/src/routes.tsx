@@ -15,6 +15,8 @@ const CourseDetail = lazy(() => import('./features/course/components/CourseDetai
 const CreateCategory = lazy(() => import('./features/category/components/CreateCategory'));
 const CreateCourse = lazy(() => import('./features/course/form/CreateCourse'));
 const EditCourse = lazy(() => import('./features/course/form/EditCourse'));
+const InstructorDetail = lazy(() => import('./features/instructor/components/InstructorDetail'));
+const EditInstructor = lazy(() => import('./features/instructor/components/EditInstructor'));
 
 const withSuspense = (Component: React.ComponentType) => (
   <Suspense fallback={<p>Loading...</p>}>
@@ -90,8 +92,12 @@ export const router = createBrowserRouter([
             element: withSuspense(CreateInstructor),
           },
           {
+            path: ':id',
+            element: withSuspense(InstructorDetail),
+          },
+          {
             path: ':id/edit',
-            element: <p>Edit Instructor</p>,
+            element: withSuspense(EditInstructor),
           },
         ],
       },

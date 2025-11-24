@@ -6,6 +6,7 @@ export interface Course {
   description: string;
   category: string;
   instructor: string;
+  instructorId?: number; // Add instructor ID for linking
   createdAt: string; // ISO date string
   status: string;
 }

@@ -7,6 +7,7 @@ import { DataTableColumnHeader } from '@cms/ui/components/data-table-column-head
 import type { InstructorType } from '../data/schema';
 import { DataTableRowActions } from './data-table-row-actions';
 import { Checkbox } from '@cms/ui/components/checkbox';
+import { Link } from 'react-router-dom';
 
 export const columns: ColumnDef<InstructorType>[] = [
   {
@@ -42,9 +43,12 @@ export const columns: ColumnDef<InstructorType>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <div className="flex flex-col gap-1 min-w-0">
-          <span className="font-semibold text-base leading-tight max-w-48">
+          <Link
+            to={`/instructor/${row.original.id}`}
+            className="font-semibold text-base leading-tight max-w-48 hover:text-purple-600 transition-colors"
+          >
             {row.original.name}
-          </span>
+          </Link>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Hash className="h-3 w-3" />
             <span>ID: {row.original.id}</span>

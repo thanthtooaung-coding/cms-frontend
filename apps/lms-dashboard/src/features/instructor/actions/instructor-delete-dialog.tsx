@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { InstructorDataType } from '../data/schema';
 import { ConfirmDialog } from '@cms/ui/components/comfirm-dialog';
 import { IconAlertTriangle } from '@tabler/icons-react';
@@ -15,6 +16,7 @@ interface Props {
 export function InstructorDeleteDialog({ open, onOpenChange, currentRow }: Props) {
   const [value, setValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   //   const deleteMutation = useMutation({
   //     mutationFn: deleteBrand,
@@ -35,10 +37,24 @@ export function InstructorDeleteDialog({ open, onOpenChange, currentRow }: Props
 
       if (value.trim() !== currentRow.name) return;
 
-      console.log(instructorID);
-      //   await deleteMutation.mutateAsync(brandId);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${instructorID}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to delete instructor');
+      }
+
+      // Close dialog and navigate back to instructor list
+      onOpenChange(false);
+      navigate('/instructor');
     } catch (error) {
       console.error('Delete error:', error);
+      alert('Failed to delete instructor. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

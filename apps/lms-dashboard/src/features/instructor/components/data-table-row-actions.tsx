@@ -1,6 +1,7 @@
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { Row } from '@tanstack/react-table';
 import { IconTrash } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 
 import {
   DropdownMenu,
@@ -20,7 +21,7 @@ interface DataTableRowActionsProps<TData> {
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
   const instructor = InstructorSchema.parse(row.original);
-
+  const navigate = useNavigate();
   const { setOpen, setCurrentRow } = useInstructor();
 
   return (
@@ -37,8 +38,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem
           onClick={() => {
-            setCurrentRow(instructor);
-            setOpen('edit');
+            navigate(`/instructor/${instructor.id}/edit`);
           }}
         >
           Edit

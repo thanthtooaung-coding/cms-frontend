@@ -6,6 +6,7 @@ import ExplorePage from './Pages/Explore';
 import HomePage from './Pages/HomePage';
 import CourseDetail from './Pages/CourseDetail';
 import CourseLesson from './Pages/CourseLesson';
+import TeacherDetail from './Pages/TeacherDetail';
 //import { LoginAuthForm } from './features/auth/components/LoginAuthForm';
 const About = lazy(() => import('./features/about/app'));
 const Client = lazy(() => import('./features/client/app'));
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
         path : "course-lesson",
         element : <CourseLesson/>
         
+      },
+      {
+        path : "teacher/:id",
+        element : <TeacherDetail/>
       }
     ]
   }

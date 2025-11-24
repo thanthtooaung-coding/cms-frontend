@@ -419,7 +419,12 @@ const CourseDetail = () => {
                     </div>
                     <div>
                         <h3 className="text-sm font-semibold text-gray-500">INSTRUCTOR</h3>
-                        <p className="text-md font-medium">{course.instructor.name}</p>
+                        <Link 
+                            to={`/instructor/${course.instructor.id}`}
+                            className="text-md font-medium hover:text-purple-600 transition-colors"
+                        >
+                            {course.instructor.name}
+                        </Link>
                     </div>
                 </div>
             </CardHeader>

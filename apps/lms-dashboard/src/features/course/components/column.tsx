@@ -120,12 +120,16 @@ export const columns: ColumnDef<Course>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Instructor" />,
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
-        <Link
-          to={`/instructor/${slugify(row.original.instructor)}`}
-          className="text-base leading-tight max-w-48 text-blue-600 hover:underline "
-        >
-          <span className=" text-base leading-tight max-w-48">{row.original.instructor}</span>
-        </Link>
+        {row.original.instructorId ? (
+          <Link
+            to={`/instructor/${row.original.instructorId}`}
+            className="text-base leading-tight max-w-48 text-blue-600 hover:underline"
+          >
+            <span className="text-base leading-tight max-w-48">{row.original.instructor}</span>
+          </Link>
+        ) : (
+          <span className="text-base leading-tight max-w-48">{row.original.instructor}</span>
+        )}
       </div>
     ),
     size: 300,

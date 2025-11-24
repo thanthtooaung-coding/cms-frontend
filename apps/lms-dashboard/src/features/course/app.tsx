@@ -31,6 +31,7 @@ const CourseApp = () => {
           description: course.description,
           category: course.category.name,
           instructor: course.instructor.name,
+          instructorId: course.instructor.id, // Store instructor ID for linking
           createdAt: new Date(course.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
           status: course.status ? course.status.toLowerCase() : 'pending',
         }));

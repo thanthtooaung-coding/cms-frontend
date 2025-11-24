@@ -1,23 +1,36 @@
 
 import { Star, Mail, BookOpen, Users } from "lucide-react";
 import { Avatar, AvatarImage } from "@cms/ui/components/avatar";
+import { Link } from "react-router";
+import { useCourseStore } from "../store/course-store";
 
 const InstructorSection = () => {
+  const { courseData } = useCourseStore();
+  const instructor = courseData?.instructor;
+  
+  if (!instructor) {
+    return null;
+  }
+
   const title = "Instructor";
-  const type = "AWS certified, Professional Web Developer and Instructor";
-  const photoUrl = "https://randomuser.me/api/portraits/men/32.jpg";
-  const name = "Maximilian Schwarzmüller";
-  const email = "maximilian@example.com";
-  const coursesCount = 5;
-  const studentsCount = 200;
-  const rating = 4.7;
+  const type = "Professional Instructor";
+  const photoUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${instructor.name}`;
+  const name = instructor.name;
+  const email = instructor.email;
+  const coursesCount = instructor.totalCourses || 0;
+  const studentsCount = instructor.totalStudents || 0;
+  const rating = 4.7; // Default rating, would come from backend
 
   return (
     <div className="py-12 gap-1 flex flex-col ">
       <div className="">
           <h2 className="text-2xl font-bold pb-5">{title}</h2>
 
-      <h2 className="text-xl underline text-purple-600 font-bold">{name}</h2>
+      <Link to={`/teacher/${instructor.id}`}>
+        <h2 className="text-xl underline text-purple-600 font-bold hover:text-purple-800 cursor-pointer transition-colors">
+          {name}
+        </h2>
+      </Link>
       <p className="text-sm text-muted-foreground">{type}</p>
 
       <div className="flex items-center pt-3 space-x-6">
