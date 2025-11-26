@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@cms/ui/components/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { cn } from '@cms/ui/lib/utils';
+import { useAuthDataStore } from '../../store/auth-store';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@cms/ui/components/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@cms/ui/components/avatar';
 
 const navItems = [
   { label: 'Home', href: '#home', id: 'home' },
@@ -16,6 +26,7 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuthDataStore();
 
   const handleClick = (id: string) => {
     setActiveLink(id);
@@ -86,13 +97,74 @@ const Header = () => {
         </ul>
 
         {/* Desktop CTA */}
-        <div className="hidden md:block">
-          <Button
-            onClick={() => navigate('/onboarding')}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
-          >
-            Register
-          </Button>
+        <div className="hidden md:flex gap-3 items-center">
+          {isAuthenticated() && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-10 w-10 rounded-full cursor-pointer hover:bg-slate-100"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="" alt={user.name} />
+                    <AvatarFallback className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                      {user.name?.slice(0, 2).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => navigate('/profile')}
+                  className="cursor-pointer"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>My Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate('/page-request')}
+                  className="cursor-pointer"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Submit Page Request</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    logout();
+                    navigate('/');
+                  }}
+                  className="cursor-pointer text-red-600 focus:text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button
+                onClick={() => navigate('/auth')}
+                variant="outline"
+                className="border border-slate-300 text-slate-700 hover:border-blue-600 hover:text-blue-600 px-6 py-2 rounded-lg transition-all duration-200 cursor-pointer"
+              >
+                Login
+              </Button>
+              <Button
+                onClick={() => navigate('/onboarding')}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
+              >
+                Register
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -131,13 +203,71 @@ const Header = () => {
                 </li>
               ))}
             </ul>
-            <div className="pt-3 border-t border-slate-200">
-              <Button
-                onClick={() => navigate('/onboarding')}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
-              >
-                Get Started
-              </Button>
+            <div className="pt-3 border-t border-slate-200 space-y-2">
+              {isAuthenticated() && user ? (
+                <>
+                  <div className="px-3 py-2 border-b border-slate-200 mb-2">
+                    <p className="text-sm font-medium text-slate-900">{user.name}</p>
+                    <p className="text-xs text-slate-500">{user.email}</p>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      navigate('/profile');
+                      setMobileOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full border border-slate-300 text-slate-700 hover:border-blue-600 hover:text-blue-600 px-4 py-2 rounded-lg transition-all duration-200"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    My Profile
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      navigate('/page-request');
+                      setMobileOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full border border-slate-300 text-slate-700 hover:border-blue-600 hover:text-blue-600 px-4 py-2 rounded-lg transition-all duration-200"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Submit Page Request
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                      setMobileOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full border border-red-300 text-red-600 hover:border-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-all duration-200"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => {
+                      navigate('/auth');
+                      setMobileOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full border border-slate-300 text-slate-700 hover:border-blue-600 hover:text-blue-600 px-4 py-2 rounded-lg transition-all duration-200"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      navigate('/onboarding');
+                      setMobileOpen(false);
+                    }}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

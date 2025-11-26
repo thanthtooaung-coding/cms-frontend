@@ -1,8 +1,6 @@
 import Hero from '../components/LandingPage/Hero';
 import Service from '../components/LandingPage/Service';
 import About from '../components/LandingPage/About';
-import useAuthStore from '../store/auth-store';
-import { useEffect } from 'react';
 
 export default function Home() {
   /*

@@ -1,7 +1,7 @@
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Input } from '@cms/ui/components/input';
 import { Textarea } from '@cms/ui/components/textarea';
@@ -23,9 +23,10 @@ import {
 } from '@cms/ui/components/form';
 import { ImageUploader } from '@cms/ui/components/ImageUploader';
 import { useMutation } from '@tanstack/react-query';
-import { createPageRequest, uploadFile } from '@cms/data';
+import { uploadFile } from '@cms/data';
 import { Alert, AlertTitle, AlertDescription } from '@cms/ui/components/alert';
 import { useEffect, useState } from 'react';
+import { useAuthDataStore } from '../../store/auth-store';
 
 const schema = z.object({
   requestType: z.enum([
@@ -47,6 +48,8 @@ const schema = z.object({
 type PageRequestFormData = z.infer<typeof schema>;
 
 export default function PageRequestForm() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuthDataStore();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const form = useForm<PageRequestFormData>({
@@ -59,6 +62,13 @@ export default function PageRequestForm() {
       pageLogo: undefined as any,
     },
   });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/auth');
+    }
+  }, [isAuthenticated, navigate]);
 
   const watchedTitle = form.watch('title');
   const watchedRequestType = form.watch('requestType');
@@ -89,23 +99,49 @@ export default function PageRequestForm() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: PageRequestFormData) => {
+      if (!user || !isAuthenticated()) {
+        throw new Error('You must be logged in to submit a page request');
+      }
+
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      // Upload logo file
       const uploadResponse = await uploadFile(data.pageLogo);
-      
       const logoUrl = uploadResponse.url;
 
       if (!logoUrl) {
         throw new Error('File upload succeeded, but no URL was returned.');
       }
 
-      const pageRequestPayload = {
-        requestType: data.requestType,
-        title: data.title,
-        pageDescription: data.pageDescription,
-        pageUrl: data.pageUrl,
-        logoUrl: logoUrl,
-      };
+      // Create form data for page request
+      const formData = new FormData();
+      formData.append('ownerId', user.id);
+      formData.append('requestType', data.requestType);
+      formData.append('title', data.title);
+      formData.append('pageDescription', data.pageDescription);
+      formData.append('pageUrl', data.pageUrl);
+      formData.append('logoUrl', logoUrl);
 
-      return createPageRequest(pageRequestPayload);
+      // Submit page request with authentication
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001/api';
+      const response = await fetch(`${API_BASE_URL}/cms/page-request`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Failed to submit page request' }));
+        throw new Error(error.message || 'Failed to submit page request');
+      }
+
+      const result = await response.json();
+      return result;
     },
     onSuccess: (data: any) => {
       setErrorMessage(null);
@@ -114,7 +150,7 @@ export default function PageRequestForm() {
     },
     onError: (error: any) => {
       setSuccessMessage(null);
-      const message = error?.response?.data?.message || 'An unexpected error occurred. Please try again.';
+      const message = error?.message || 'An unexpected error occurred. Please try again.';
       setErrorMessage(message);
     },
   });

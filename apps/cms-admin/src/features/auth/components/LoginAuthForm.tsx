@@ -2,6 +2,8 @@ import type { HTMLAttributes } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import { Button } from '@cms/ui/components/button';
 import {
@@ -15,16 +17,18 @@ import {
 
 import { Input } from '@cms/ui/components/input';
 
-import { Link, useActionData, useNavigation, useSubmit } from 'react-router';
+import { Link } from 'react-router';
 import { PasswordInput } from '../../../components/utils/password-input';
+import { login } from '../../../api/authApi';
+import { useAuthDataStore } from '../../../store/auth-store';
 
 type UserAuthFormProps = HTMLAttributes<HTMLDivElement>;
 
 export const LoginformSchema = z.object({
-  email: z
+  username: z
     .string()
-    .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
+    .min(1, { message: 'Please enter your username' })
+    .min(3, { message: 'Username must be at least 3 characters long' }),
   password: z
     .string()
     .min(1, {
@@ -36,22 +40,46 @@ export const LoginformSchema = z.object({
 });
 
 export function LoginAuthForm({ className, ...props }: UserAuthFormProps) {
-  const submit = useSubmit();
-  const navigation = useNavigation();
-  const actionData = useActionData() as { error?: string; message?: string };
-
-  const isSubmitting = navigation.state === 'submitting';
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setUser } = useAuthDataStore();
 
   const form = useForm<z.infer<typeof LoginformSchema>>({
     resolver: zodResolver(LoginformSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
 
-  function onSubmit(data: z.infer<typeof LoginformSchema>) {
-    submit(data, { method: 'post', action: '/login' });
+  async function onSubmit(data: z.infer<typeof LoginformSchema>) {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      const response = await login({
+        username: data.username,
+        password: data.password,
+      });
+
+      // Store token and user
+      localStorage.setItem('auth_token', response.token);
+      const { setToken } = useAuthDataStore.getState();
+      setToken(response.token);
+      setUser({
+        id: response.user.id.toString(),
+        name: response.user.name || response.user.username,
+        email: response.user.email,
+      });
+
+      // Navigate to dashboard
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -61,12 +89,12 @@ export function LoginAuthForm({ className, ...props }: UserAuthFormProps) {
           <div className="grid gap-2">
             <FormField
               control={form.control}
-              name="email"
+              name="username"
               render={({ field }) => (
                 <FormItem className="space-y-1">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder="Enter your username" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -95,7 +123,7 @@ export function LoginAuthForm({ className, ...props }: UserAuthFormProps) {
             />
 
             {/* Error Message */}
-            {actionData?.message && <p className="text-sm text-red-500">{actionData.message}</p>}
+            {error && <p className="text-sm text-red-500">{error}</p>}
 
             <Button type="submit" className="mt-2 w-full cursor-pointer" disabled={isSubmitting}>
               {isSubmitting ? 'Signing in...' : 'Sign In'}

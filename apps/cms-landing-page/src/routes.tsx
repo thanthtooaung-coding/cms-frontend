@@ -17,6 +17,7 @@ import MfaSetup from './features/auth/register/mfaSetup';
 import MfaVerify from './features/auth/register/verify-mfa';
 import LoginOnboardingStepperLayout from './features/auth/login/LoginOnboardingLayout';
 import LoginMFAVerify from './features/auth/login/login-verify';
+import ProfilePage from './features/profile/ProfilePage';
 
 const LandingPage = lazy(() => import('./page/index'));
 const LoginPage = lazy(() => import('./features/auth/login'));
@@ -49,6 +50,11 @@ export const router = createBrowserRouter([
       {
         path: '/page-request',
         element: withSuspense(PageRequestForm),
+        errorElement: <Error />,
+      },
+      {
+        path: '/profile',
+        element: withSuspense(ProfilePage),
         errorElement: <Error />,
       },
     ],

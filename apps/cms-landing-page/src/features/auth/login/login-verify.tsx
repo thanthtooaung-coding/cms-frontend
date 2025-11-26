@@ -22,7 +22,7 @@ import { VerifyLoginMFA } from '@cms/data';
 import { useNavigate } from 'react-router';
 import { useMutation } from '@tanstack/react-query';
 import { useLoginStore } from '../../../store/login-store';
-import useAuthStore from '../../../store/auth-store';
+import { useAuthDataStore } from '../../../store/auth-store';
 
 const mfaVerifySchema = z.object({
   mfaCode: z
@@ -43,7 +43,7 @@ const LoginMFAVerify = () => {
   const setError = useLoginStore((state) => state.setError);
   const vefityMfa = useLoginStore((state) => state.setupMFA);
 
-  const { setEmail } = useAuthStore();
+  const { setUser } = useAuthDataStore();
 
   const [isVerified, setIsVerified] = useState(false);
 
@@ -87,7 +87,14 @@ const LoginMFAVerify = () => {
       vefityMfa('');
       setIsVerified(true);
       clearState();
-      setEmail(data.data.user.email);
+      // Update user in auth store if user data is available
+      if (data.data?.user) {
+        setUser({
+          id: data.data.user.id?.toString() || '',
+          name: data.data.user.name || data.data.user.username || '',
+          email: data.data.user.email || '',
+        });
+      }
       navigate('/');
     },
   });

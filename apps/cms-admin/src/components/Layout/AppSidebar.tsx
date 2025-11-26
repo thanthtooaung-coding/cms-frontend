@@ -11,12 +11,15 @@ import { NavUser } from './nav-user';
 import { NavGroup } from './NavGroup';
 
 import { LogoHeader } from './LogoHeader';
+import { useAuthDataStore } from '../../store/auth-store';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  //   const { user } = useAuthDataStore();
-  const user = {
-    name: 'Brian',
-    email: 'Brian@gmail.com',
+  const { user } = useAuthDataStore();
+  
+  // Default user if not authenticated (shouldn't happen due to auth guard)
+  const displayUser = user || {
+    name: 'Guest',
+    email: 'guest@example.com',
   };
   return (
     <Sidebar collapsible="icon" variant="floating" {...props}>
@@ -29,7 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={displayUser} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

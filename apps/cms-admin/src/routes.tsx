@@ -3,6 +3,8 @@ import { lazy, Suspense } from 'react';
 import { AuthenticatedLayout } from './components/Layout/authenticated-layout';
 
 import LoginPage from './features/auth/components/LoginPage';
+import SignupPage from './features/auth/components/SignupPage';
+import LogoutPage from './features/auth/components/LogoutPage';
 
 import userListing from './features/report/components/userListing';
 import { OwnerLoader, PageLoader, PageRequestLoader } from './router/loader/data-loader';
@@ -78,6 +80,11 @@ export const router = createBrowserRouter([
     element: <LoginPage />, // Login is not lazy-loaded as it's usually needed immediately
   },
   {
+    path: '/signup',
+    element: <SignupPage />,
+  },
+  {
     path: '/logout',
+    element: <LogoutPage />,
   },
 ]);

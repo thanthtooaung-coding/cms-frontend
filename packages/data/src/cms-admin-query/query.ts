@@ -57,7 +57,6 @@ export const updatePageRequestStatus = async (data: {
   const api = getApiClient();
   return (
     await api.put('/page-request/status', {
-      userId: 1,
       requestId: data.requestId,
       status: data.status,
     })

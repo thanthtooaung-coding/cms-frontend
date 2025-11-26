@@ -1,94 +1,45 @@
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
-export interface User {
+type User = {
   id: string;
+  name: string;
   email: string;
-  emailVerified: boolean;
-  mfaSetup: boolean;
-  onboardingComplete: boolean;
-  roles: string[];
-}
+};
 
-interface AuthState {
-  isAuthenticated: boolean;
+type AuthState = {
   user: User | null;
-}
-
-type Actions = {
-  setIsAuthenticated: (status: boolean) => void;
+  token: string | null;
   setUser: (user: User | null) => void;
-  updateMfaStatus: (status: boolean) => void;
-  resetAuth: () => void;
-  setEmail: (email: string) => void;
+  setToken: (token: string | null) => void;
+  logout: () => void;
+  isAuthenticated: () => boolean;
 };
 
-type AuthStore = AuthState & Actions;
-
-const initialState: AuthState = {
-  isAuthenticated: false,
-  user: null,
-};
-
-const useAuthStore = create<AuthStore>()(
+export const useAuthDataStore = create<AuthState>()(
   persist(
-    immer((set) => ({
-      ...initialState,
-
-      setIsAuthenticated: (status: boolean) => {
-        set((state) => {
-          state.isAuthenticated = status;
-        });
+    immer((set, get) => ({
+      user: null,
+      token: null,
+      setUser: (user) => set({ user }),
+      setToken: (token) => {
+        set({ token });
+        if (token) {
+          localStorage.setItem('auth_token', token);
+        } else {
+          localStorage.removeItem('auth_token');
+        }
       },
-
-      setEmail: (email: string) => {
-        set((state) => {
-          if (state.user) {
-            state.user.email = email;
-          }
-        });
+      logout: () => {
+        set({ user: null, token: null });
+        localStorage.removeItem('auth_token');
       },
-
-      setUser: (user: User | null) => {
-        set((state) => {
-          state.user = {
-            id: user?.id || '',
-            email: user?.email || '',
-            mfaSetup: user?.mfaSetup || false,
-            onboardingComplete: user?.onboardingComplete || false,
-            roles: user?.roles || [],
-            emailVerified: user?.emailVerified || false,
-          };
-          state.isAuthenticated = user !== null;
-        });
-      },
-
-      updateMfaStatus: (status: boolean) => {
-        set((state) => {
-          if (state.user) {
-            state.user.mfaSetup = status;
-          }
-        });
-      },
-
-      resetAuth: () => {
-        set(() => {
-          localStorage.removeItem('authToken'); // Clear token from storage as well
-          return initialState;
-        });
+      isAuthenticated: () => {
+        const state = get();
+        return state.user !== null && state.token !== null;
       },
     })),
-    {
-      name: 'auth-credentials',
-      storage: createJSONStorage(() => localStorage),
-
-      partialize: (state) => ({
-        isAuthenticated: state.isAuthenticated,
-        user: state.user ? { ...state.user, roles: state.user.roles } : null,
-      }),
-    }
+    { name: 'auth-storage', storage: createJSONStorage(() => sessionStorage) }
   )
 );
-
-export default useAuthStore;

@@ -26,8 +26,6 @@ import { Link, useNavigate } from 'react-router';
 
 import { useRegistrationStore } from '../../../store/register-store';
 import { useMutation } from '@tanstack/react-query';
-import { RegisterCMSAccount } from '@cms/data';
-import { generateVerificationCode } from '../../../utils/generate-email-code';
 
 const registerStepTwoSchema = z
   .object({
@@ -68,36 +66,55 @@ const RegisterStepTwo = () => {
   });
 
   const { isPending, mutateAsync } = useMutation({
-    mutationFn: RegisterCMSAccount,
-    onSuccess: (data) => {
-      console.log(data);
+    mutationFn: async (signupData: { username: string; password: string; email: string; name?: string }) => {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001/api'}/cms/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(signupData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Signup failed' }));
+        throw new Error(error.message || 'Signup failed');
+      }
+
+      const result = await response.json();
+      return result;
+    },
+    onSuccess: (result) => {
+      const responseData = result.data;
+      console.log('Signup successful:', responseData);
+      
+      // Store token and user
+      if (responseData.token) {
+        localStorage.setItem('auth_token', responseData.token);
+      }
+      
       submitStepTwo({
         username: form.getValues('username'),
         role: form.getValues('role'),
         password: form.getValues('password'),
         confirmPassword: form.getValues('confirmPassword'),
-        userId: data.data.user.id,
+        userId: responseData.user.id.toString(),
       });
 
-      const verificationCode = generateVerificationCode();
-      data.verificationCode = verificationCode;
-
-      navigate('/onboarding/verify-email');
+      // Navigate to home or dashboard
+      navigate('/');
     },
   });
 
   const onSubmit = async (formData: RegisterStepTwoData) => {
     try {
-      console.log('data', data);
       await mutateAsync({
-        name: formData.username,
-        role: formData.role,
+        username: formData.username,
         password: formData.password,
         email: data.email,
+        name: data.name || formData.username,
       });
     } catch (error: any) {
       const message =
-        error?.response?.data?.message ||
         error?.message ||
         'An error occurred while creating the account';
 

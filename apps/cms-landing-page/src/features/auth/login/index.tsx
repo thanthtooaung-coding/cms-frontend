@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -13,65 +13,62 @@ import {
 import { Button } from '@cms/ui/components/button';
 import { Input } from '@cms/ui/components/input';
 import { Link, useNavigate } from 'react-router';
-import { useMutation } from '@tanstack/react-query';
-import { LoginCMSAccount } from '@cms/data';
-import { useLoginStore } from '../../../store/login-store';
+import { useState } from 'react';
+import { login } from '../../../api/authApi';
+import { useAuthDataStore } from '../../../store/auth-store';
+import { Alert, AlertDescription } from '@cms/ui/components/alert';
 
 const loginSchema = z.object({
-  email: z
+  username: z
     .string()
-    .min(1, { message: 'Email is required' })
-    .email({ message: 'Please enter a valid email address' }),
+    .min(1, { message: 'Username is required' })
+    .min(3, { message: 'Username must be at least 3 characters' }),
   password: z
     .string()
     .min(1, { message: 'Password is required' })
-    .min(6, { message: 'Password must be at least 6 characters' }),
+    .min(7, { message: 'Password must be at least 7 characters' }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { Login, setError } = useLoginStore();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setUser, setToken } = useAuthDataStore();
+
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
-    },
-  });
-
-  const { isPending, mutateAsync } = useMutation({
-    mutationFn: LoginCMSAccount,
-    onSuccess: (data) => {
-      console.log('Login successful:', data.data.user.id);
-      Login({
-        userId: data.data.user.id,
-      });
-
-      navigate('/auth/mfa');
-    },
-    onError: (error) => {
-      console.error('Login failed:', error);
-      // Handle login error, e.g., show error message
     },
   });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await mutateAsync({
-        email: data.email,
+      setIsSubmitting(true);
+      setError(null);
+
+      const response = await login({
+        username: data.username,
         password: data.password,
       });
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        'An error occurred while creating the account';
 
-      setError(message);
-      console.log(message);
-      // Handle form submission error
+      // Store token and user
+      setToken(response.token);
+      setUser({
+        id: response.user.id.toString(),
+        name: response.user.name || response.user.username,
+        email: response.user.email,
+      });
+
+      // Navigate to home page
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -84,22 +81,30 @@ const LoginPage = () => {
           <p className="text-gray-600">Sign in to your account to continue</p>
         </div>
 
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Form */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="email"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Email Address</FormLabel>
+                  <FormLabel className="text-sm font-medium text-gray-700">Username</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <Input
-                        type="email"
-                        placeholder="Enter your email"
+                        type="text"
+                        placeholder="Enter your username"
                         className="pl-10 h-12 border-gray-200 focus:border-gray-900 focus:ring-gray-900 rounded-lg"
+                        disabled={isSubmitting}
                         {...field}
                       />
                     </div>
@@ -122,6 +127,7 @@ const LoginPage = () => {
                         type="password"
                         placeholder="Enter your password"
                         className="pl-10 h-12 border-gray-200 focus:border-gray-900 focus:ring-gray-900 rounded-lg"
+                        disabled={isSubmitting}
                         {...field}
                       />
                     </div>
@@ -149,10 +155,10 @@ const LoginPage = () => {
 
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isSubmitting}
               className="w-full h-12 bg-slate-700 hover:bg-slate-800 text-white font-medium rounded-lg"
             >
-              {isPending ? 'Logging in...' : 'Log In'}
+              {isSubmitting ? 'Logging in...' : 'Log In'}
             </Button>
           </form>
         </Form>
