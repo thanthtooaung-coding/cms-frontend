@@ -1,13 +1,12 @@
-import { useMemo, useState } from 'react';
-import { Star, Heart } from 'lucide-react';
+import React from 'react';
+import { Heart, Award } from 'lucide-react';
 import { Button } from '@cms/ui/components/button';
 import { Badge } from '@cms/ui/components/badge';
 import { Card, CardContent } from '@cms/ui/components/card';
-//import { cn } from '/lib/utils';
 import { cn } from '@cms/ui/lib/utils';
 import { useWishlistStore } from '../store/wishlistStore';
 import type{ Category, Course, CourseData, Instructor } from '../api/types/courseData';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useCourseStore } from '../store/course-store';
 
 
@@ -17,8 +16,7 @@ interface CourseCardProps {
   instructor: Instructor;
   category : Category;
   variant?: 'default' | 'compact' | 'list';
-  showProgress?: boolean;
-  progress?: number;
+  hasCertificate?: boolean;
 }
 
 export default function CourseCard({
@@ -27,10 +25,8 @@ export default function CourseCard({
   category,
   course,
   variant = 'default',
-  showProgress,
-  progress,
+  hasCertificate = false,
 }: CourseCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const isWishlisted = isInWishlist(course.id.toString());
 
@@ -43,25 +39,20 @@ export default function CourseCard({
     }
   };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={cn(
-          'h-3 w-3',
-          i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-        )}
-      />
-    ));
-  };
-  const price = useMemo(() => (Math.random() * (110 - 20) + 20).toFixed(2), []);
-  const level = useMemo(() => {
-    const levels = ['Beginner', 'Intermediate'];
-    return levels[Math.floor(Math.random() * levels.length)];
-  }, []);
 
   const navigate = useNavigate();
+  const { tenantSlug } = useParams<{ tenantSlug?: string }>();
   const { setCourseData } = useCourseStore();
+  
+  const getCoursePath = (courseId: number) => {
+    const basePath = tenantSlug ? `/lms/${tenantSlug}` : '';
+    return `${basePath}/course/${courseId}`;
+  };
+
+  const getCourseLessonPath = (courseId: number) => {
+    const basePath = tenantSlug ? `/lms/${tenantSlug}` : '';
+    return `${basePath}/course/${courseId}/lesson`;
+  };
 
   if (variant === 'compact') {
     return (
@@ -72,30 +63,30 @@ export default function CourseCard({
             alt={course.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
+          {hasCertificate && (
+            <div className="absolute top-2 right-2 z-10">
+              <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold px-2 py-1 shadow-md border-0 flex items-center gap-1">
+                <Award className="w-3 h-3" />
+                Certified
+              </Badge>
+            </div>
+          )}
         </div>
         <CardContent className="p-3 sm:p-4">
           <h3 className="font-semibold text-xs sm:text-sm line-clamp-2 mb-2">{course.name}</h3>
           <p className="text-xs text-gray-600 mb-2">{instructor.name}</p>
-          {showProgress && progress !== undefined && (
-            <div className="mb-2">
-              <div className="flex justify-between text-xs text-gray-600 mb-1">
-                <span>Progress</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+          {hasCertificate && (
+            <div className="mb-2 flex items-center gap-1 text-xs text-yellow-600 font-medium">
+              <Award className="w-3 h-3" />
+              <span>Certificate Earned</span>
             </div>
           )}
           <Button size="sm" className="w-full mt-2 text-xs sm:text-sm "
           onClick={()=>{
             setCourseData(data);
-            navigate(`/course-lesson`)
+            navigate(getCourseLessonPath(course.id))
           }}>
-            {showProgress ? 'Continue Course' : 'Start Course'}
+            Continue Course
           </Button>
         </CardContent>
       </Card>
@@ -107,7 +98,7 @@ export default function CourseCard({
         <Card className="overflow-hidden hover:shadow-md transition-shadow" 
         onClick={()=>{
           setCourseData(data);
-          navigate(`/course-detail`)
+          navigate(getCoursePath(course.id))
         }}>
           <div className="flex flex-col sm:flex-row">
             <div className="w-full sm:w-48 h-48 sm:h-32 flex-shrink-0">
@@ -124,24 +115,9 @@ export default function CourseCard({
                   </p>
                   <p className="text-sm text-gray-600 mb-2">By {instructor.name}</p>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-                    <div className="flex items-center space-x-1">
-                      <span className="font-semibold text-yellow-600">
-                        {course.rating.averageRating}
-                      </span>
-                      <div className="flex">{renderStars(course.rating.averageRating)}</div>
-                      {/* <span className="text-gray-500">({course.reviews.toLocaleString()})</span> */}
-                    </div>
                     <span className="text-gray-500">{course.duration}</span>
                     {/* <Badge variant="secondary">{course.level}</Badge> */}
                   </div>
-                </div>
-                <div className="text-right ml-2 sm:ml-4 mt-2 sm:mt-0">
-                  <div className="text-lg sm:text-xl font-bold">${price}</div>
-                  {/* {course.originalPrice && (
-                  <div className="text-xs sm:text-sm text-gray-500 line-through">
-                    ${course.originalPrice}
-                  </div>
-                )} */}
                 </div>
               </div>
             </div>
@@ -152,83 +128,80 @@ export default function CourseCard({
 
   return (
     <Card
-      className="overflow-hidden cursor-pointer group relative pt-0"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="overflow-hidden cursor-pointer group relative border-0 shadow-sm hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 rounded-xl"
+      onClick={() => {
+        setCourseData(data);
+        navigate(getCoursePath(course.id));
+      }}
     >
-      <div className="aspect-video relative">
+      {/* Image Section */}
+      <div className="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-800">
         <img
           src={course.imgUrl}
           alt={course.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
-        {/* Wishlist Button */}
+        {/* Category Badge - Top Left */}
+        <div className="absolute top-3 left-3 z-10">
+          <Badge className="bg-purple-600 text-white text-xs font-semibold px-3 py-1 shadow-md border-0">
+            {category.name}
+          </Badge>
+        </div>
+
+        {/* Wishlist Button - Top Right */}
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            'absolute top-1 right-1 sm:top-2 sm:right-2 bg-white/80 backdrop-blur-sm hover:bg-white transition-all h-8 w-8 sm:h-10 sm:w-10',
-            isWishlisted ? 'text-red-500' : 'text-gray-600'
+            'absolute top-3 right-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-all h-9 w-9 rounded-full shadow-md z-10',
+            isWishlisted ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'
           )}
           onClick={handleWishlistClick}
         >
-          <Heart className={cn('h-3 w-3 sm:h-4 sm:w-4', isWishlisted && 'fill-current')} />
+          <Heart className={cn('h-4 w-4', isWishlisted && 'fill-current')} />
         </Button>
-
-        {/* Highest Rated Badge */}
-        {/* {course.isHighestRated && (
-          <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-yellow-500 text-white text-xs">
-            Highest Rated
-          </Badge>
-        )} */}
-
-        {/* Hover Overlay */}
-        <div
-          className={cn(
-            'absolute inset-0 bg-black/80 flex flex-col justify-center items-center p-2 sm:p-4 transition-opacity duration-300',
-            isHovered ? 'opacity-100' : 'opacity-0'
-          )}
-        >
-          <p className="text-white text-xs sm:text-sm text-center mb-2 sm:mb-4 line-clamp-3">
-            {course.description}
-          </p>
-          <Button
-            size="sm"
-            className="bg-purple-600 hover:bg-purple-700 text-xs sm:text-sm"
-            onClick={() =>{
-              setCourseData(data);
-              navigate('/course-detail')
-            }}
-          >
-            Go to Course
-          </Button>
-        </div>
       </div>
 
-      <CardContent className="p-3 sm:p-4">
-        <h3 className="font-semibold text-sm sm:text-base line-clamp-2 mb-2 group-hover:text-purple-600 transition-colors">
+      {/* Content Section */}
+      <CardContent className="p-5">
+        {/* Title */}
+        <h3 className="font-bold text-lg line-clamp-2 text-gray-900 dark:text-gray-100 mb-2.5 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors leading-snug">
           {course.name}
         </h3>
-        <p className="text-xs sm:text-sm text-gray-600 mb-2">{instructor.name}</p>
 
-        <div className="flex items-center space-x-1 mb-2">
-          <span className="font-semibold text-yellow-600 text-xs sm:text-sm">
-            {course.rating.averageRating}
-          </span>
-          <div className="flex">{renderStars(course.rating.averageRating)}</div>
-          <span className="text-gray-500 text-xs sm:text-sm">{course.modules.length} modules</span>
-        </div>
+        {/* Instructor */}
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {instructor.name}
+        </p>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="font-bold text-sm sm:text-lg">${price}</span>
+        {/* Course Info with Icons */}
+        <div className="space-y-2 mb-5">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <svg className="w-4 h-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <span>{course.modules.length} {course.modules.length === 1 ? 'module' : 'modules'}</span>
           </div>
-
-          <Badge variant="outline" className="text-xs">
-            {level}
-          </Badge>
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <svg className="w-4 h-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{course.duration}</span>
+          </div>
         </div>
+
+        {/* Go to Course Button */}
+        <Button
+          className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCourseData(data);
+            navigate(getCoursePath(course.id));
+          }}
+        >
+          Go to Course
+        </Button>
       </CardContent>
     </Card>
   );

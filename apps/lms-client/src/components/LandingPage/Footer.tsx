@@ -1,16 +1,22 @@
 import { Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
+import { useTenant } from '../../context/TenantContext';
 
 export default function Footer() {
+  const { tenantInfo } = useTenant();
+  const tenantName = tenantInfo?.tenantName || 'LearnHub';
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Logo and Description */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400" />
-              <span className="text-xl sm:text-2xl font-bold">LearnHub</span>
+            <div className="flex items-center space-x-2 mb-4 min-w-0">
+              <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 flex-shrink-0" />
+              <span className="text-lg sm:text-xl lg:text-2xl font-bold truncate" title={tenantName}>
+                {tenantName}
+              </span>
             </div>
             <p className="text-gray-400 text-sm">
               Empowering learners worldwide with high-quality online courses and certifications.
@@ -89,19 +95,14 @@ export default function Footer() {
                 <Link to="#" className="text-gray-400 hover:text-white transition-colors">
                   Cookie Policy
                 </Link>
-              </li>
-              <li>
-                <Link to="#" className="text-gray-400 hover:text-white transition-colors">
-                  Teach on LearnHub
-                </Link>
-              </li>
+              </li>              
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-xs sm:text-sm">
-            © {new Date().getFullYear()} LearnHub. All rights reserved.
+            © {new Date().getFullYear()} {tenantName}. All rights reserved.
           </p>
           <div className="flex space-x-4 sm:space-x-6">
             <Link to="#" className="text-gray-400 hover:text-white transition-colors">

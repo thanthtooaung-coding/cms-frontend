@@ -1,21 +1,42 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@cms/ui/components/button';
 import { Card, CardContent } from '@cms/ui/components/card';
 import CourseCard from '../components/CourseCard';
-import { useNavigate } from 'react-router';
-import { getTrendingCourses1, getUserCourses } from '../api/mockData';
+import { useNavigate, useParams } from 'react-router';
 import HeroSection from '../components/HeroSection';
+import { fetchPublishedCourses } from '../utils/courseUtils';
+import type { CourseData } from '../api/types/courseData';
 
 const HomePage = () => {
-  const trendingCourses1 = getTrendingCourses1();
-  console.log(trendingCourses1);
-  const userCourses = getUserCourses();
+  const { tenantSlug } = useParams<{ tenantSlug?: string }>();
+  const [trendingCourses, setTrendingCourses] = useState<CourseData[]>([]);
+  const [userCourses, setUserCourses] = useState<CourseData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  console.log(trendingCourses1[0].course);
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const courses = await fetchPublishedCourses();
+        setTrendingCourses(courses.slice(0, 10)); // Get first 10 for trending
+        // TODO: Fetch user's enrolled courses separately
+        setUserCourses([]);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   const navigate = useNavigate();
 
   const handleTopicClick = (topic: string) => {
-    navigate(`/courses?search=${encodeURIComponent(topic)}`)}
+    const basePath = tenantSlug ? `/lms/${tenantSlug}` : '';
+    navigate(`${basePath}/courses?search=${encodeURIComponent(topic)}`);
+  };
 
   const recommendedTopics = [
     'React',
@@ -41,22 +62,35 @@ const HomePage = () => {
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
                 Trending courses
               </h2>
-              <Button variant="outline" size="sm" asChild>
-                <a href="/courses">View All</a>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const basePath = tenantSlug ? `/lms/${tenantSlug}` : '';
+                  navigate(`${basePath}/courses`);
+                }}
+              >
+                View All
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
-              {trendingCourses1.map((item, index) => (
-                <CourseCard
-                  key={index}
-                  data={item}
-                  course={item.course}
-                  instructor={item.instructor}
-                  category={item.category}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Loading courses...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
+                {trendingCourses.map((item, index) => (
+                  <CourseCard
+                    key={item.course.id || index}
+                    data={item}
+                    course={item.course}
+                    instructor={item.instructor}
+                    category={item.category}
+                  />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Let's Start Learning Section */}
@@ -66,8 +100,15 @@ const HomePage = () => {
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
                   Let's start learning
                 </h2>
-                <Button variant="outline" size="sm" asChild>
-                  <a href="/my-learning">View All</a>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    const basePath = tenantSlug ? `/lms/${tenantSlug}` : '';
+                    navigate(`${basePath}/my-learning`);
+                  }}
+                >
+                  View All
                 </Button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">

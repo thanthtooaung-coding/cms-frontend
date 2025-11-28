@@ -58,7 +58,6 @@ const CourseDescription: React.FC<Props> = ({ data }) => {
       </div>
 
       <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
-        ⭐ <strong>{course.rating.averageRating}</strong> ({course.rating.totalRating} ratings) ·{' '}
         {course.totalEnrolledStudents.toLocaleString()} students
       </div>
 

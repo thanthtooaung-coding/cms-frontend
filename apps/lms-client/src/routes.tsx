@@ -7,7 +7,9 @@ import HomePage from './Pages/HomePage';
 import CourseDetail from './Pages/CourseDetail';
 import CourseLesson from './Pages/CourseLesson';
 import TeacherDetail from './Pages/TeacherDetail';
-//import { LoginAuthForm } from './features/auth/components/LoginAuthForm';
+import SettingsPage from './Pages/SettingsPage';
+import { LoginAuthForm } from './features/auth/components/LoginAuthForm';
+import { RegisterForm } from './features/auth/components/RegisterForm';
 const About = lazy(() => import('./features/about/app'));
 const Client = lazy(() => import('./features/client/app'));
 const withSuspense = (Component: React.ComponentType) => (
@@ -34,19 +36,30 @@ export const router = createBrowserRouter([
         element: <ExplorePage />
       },
       {
-        path : "course-detail",
+        path : "course/:id",
         element : <CourseDetail/>
       },
       {
-        path : "course-lesson",
+        path : "course/:id/lesson",
         element : <CourseLesson/>
-        
       },
       {
         path : "teacher/:id",
         element : <TeacherDetail/>
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />
       }
     ]
+  },
+  {
+    path: "/lms/:tenantSlug/login",
+    element: <LoginAuthForm />
+  },
+  {
+    path: "/lms/:tenantSlug/register",
+    element: <RegisterForm />
   },
   {
     path : "/",
@@ -65,18 +78,29 @@ export const router = createBrowserRouter([
         element: <ExplorePage />
       },
       {
-        path : "course-detail",
+        path : "course/:id",
         element : <CourseDetail/>
       },
       {
-        path : "course-lesson",
+        path : "course/:id/lesson",
         element : <CourseLesson/>
-        
       },
       {
         path : "teacher/:id",
         element : <TeacherDetail/>
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />
       }
     ]
+  },
+  {
+    path: "/login",
+    element: <LoginAuthForm />
+  },
+  {
+    path: "/register",
+    element: <RegisterForm />
   }
 ]);

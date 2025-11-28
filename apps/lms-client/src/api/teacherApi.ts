@@ -17,6 +17,8 @@ export interface TeacherResponse {
     id: number;
     name: string;
   };
+  totalCourses?: number;
+  totalStudents?: number;
 }
 
 export interface CourseResponse {

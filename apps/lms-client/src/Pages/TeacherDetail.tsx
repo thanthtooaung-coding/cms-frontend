@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
-import { Star, Mail, BookOpen, Users, MapPin, Phone, ArrowLeft, GraduationCap } from 'lucide-react';
+import { Mail, BookOpen, Users, MapPin, Phone, ArrowLeft, GraduationCap } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@cms/ui/components/avatar';
 import { Card, CardContent } from '@cms/ui/components/card';
 import { Button } from '@cms/ui/components/button';
@@ -94,7 +94,7 @@ const TeacherDetail = () => {
       description: course.description,
       imgUrl: `https://images.pexels.com/photos/1181244/pexels-photo-1181244.jpeg?auto=compress&cs=tinysrgb&w=400&h=225`,
       rating: {
-        averageRating: 4.5, // Default rating, would come from backend
+        averageRating: 0,
         totalRating: 0,
       },
       totalEnrolledStudents: 0,
@@ -113,57 +113,63 @@ const TeacherDetail = () => {
     };
   };
 
-  // Calculate total students (mock for now, would need enrollment data)
-  const totalStudents = courses.length * 100; // Placeholder calculation
-  const averageRating = 4.7; // Placeholder, would come from course ratings
+  // Use actual statistics from API, fallback to calculated values if not available
+  const totalCourses = teacher.totalCourses ?? courses.length;
+  const totalStudents = teacher.totalStudents ?? 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4 text-white hover:bg-white/20"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+      <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+          <div className="max-w-7xl mx-auto">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="mb-6 text-white hover:bg-white/20 border-white/20 h-auto py-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <Avatar className="w-32 h-32 border-4 border-white">
-              <AvatarImage
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${teacher.name}`}
-                alt={teacher.name}
-              />
-              <AvatarFallback className="text-2xl bg-purple-500">
-                {teacher.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
+              <div className="flex-shrink-0 mx-auto sm:mx-0">
+                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 border-4 border-white shadow-xl ring-4 ring-white/20">
+                  <AvatarImage
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${teacher.name}`}
+                    alt={teacher.name}
+                  />
+                  <AvatarFallback className="text-2xl sm:text-3xl bg-purple-500 text-white font-bold">
+                    {teacher.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
 
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2">{teacher.name}</h1>
-              <p className="text-purple-100 text-lg mb-4">
-                {teacher.role.name} • {teacher.tenant.name}
-              </p>
+              <div className="flex-1 w-full text-center sm:text-left">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 break-words">
+                  {teacher.name}
+                </h1>
+                <p className="text-purple-100 text-lg sm:text-xl mb-6 break-words">
+                  {teacher.role.name} • {teacher.tenant.name}
+                </p>
 
-              <div className="flex flex-wrap items-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-semibold">{averageRating.toFixed(1)} Instructor Rating</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5" />
-                  <span>{courses.length} Courses</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  <span>{totalStudents.toLocaleString()} Students</span>
+                <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm">
+                    <BookOpen className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm sm:text-base whitespace-nowrap">
+                      {totalCourses} {totalCourses === 1 ? 'Course' : 'Courses'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm">
+                    <Users className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm sm:text-base whitespace-nowrap">
+                      {totalStudents.toLocaleString()} Students
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -172,95 +178,101 @@ const TeacherDetail = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Sidebar - Teacher Info */}
           <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="p-6 space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
-                  <div className="space-y-3">
-                    {teacher.email && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Mail className="w-4 h-4 text-gray-500" />
-                        <a
-                          href={`mailto:${teacher.email}`}
-                          className="text-purple-600 hover:underline"
-                        >
-                          {teacher.email}
-                        </a>
-                      </div>
-                    )}
-                    {teacher.phoneNumber && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span>{teacher.phoneNumber}</span>
-                      </div>
-                    )}
-                    {teacher.address && (
-                      <div className="flex items-start gap-3 text-sm">
-                        <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
-                        <span>{teacher.address}</span>
-                      </div>
-                    )}
+            <div className="sticky top-6">
+              <Card className="shadow-lg border-0">
+                <CardContent className="p-6 space-y-6">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                      Contact Information
+                    </h3>
+                    <div className="space-y-3">
+                      {teacher.email && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+                          <a
+                            href={`mailto:${teacher.email}`}
+                            className="text-purple-600 dark:text-purple-400 hover:underline break-all"
+                          >
+                            {teacher.email}
+                          </a>
+                        </div>
+                      )}
+                      {teacher.phoneNumber && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <Phone className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                          <span className="text-gray-700 dark:text-gray-300 break-all">{teacher.phoneNumber}</span>
+                        </div>
+                      )}
+                      {teacher.address && (
+                        <div className="flex items-start gap-3 text-sm">
+                          <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700 dark:text-gray-300 break-words">{teacher.address}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-4">Statistics</h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Total Courses</span>
-                      <span className="font-semibold">{courses.length}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Total Students</span>
-                      <span className="font-semibold">{totalStudents.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Average Rating</span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-semibold">{averageRating.toFixed(1)}</span>
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h3 className="text-base sm:text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                      Statistics
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Total Courses</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{totalCourses}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Total Students</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{totalStudents.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {teacher.role.name === 'Staff' && (
-                  <div className="border-t pt-6">
-                    <div className="flex items-center gap-2 text-purple-600">
-                      <GraduationCap className="w-5 h-5" />
-                      <span className="font-semibold">Certified Instructor</span>
+                  {(teacher.role.name === 'Staff' || teacher.role.name === 'Instructor') && (
+                    <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                      <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/20 rounded-lg p-3">
+                        <GraduationCap className="w-5 h-5 flex-shrink-0" />
+                        <span className="font-semibold text-sm sm:text-base">Certified Instructor</span>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Right Content - Courses */}
           <div className="lg:col-span-2">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-2">Courses by {teacher.name}</h2>
-              <p className="text-gray-600">
+            <div className="mb-8">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 text-gray-900 dark:text-gray-100">
+                Courses by {teacher.name}
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
                 Explore all courses taught by this instructor
               </p>
             </div>
 
             {courses.length === 0 ? (
-              <Card>
+              <Card className="shadow-lg border-0">
                 <CardContent className="p-12 text-center">
-                  <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
-                  <p className="text-gray-600">
+                  <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                    <BookOpen className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                    No courses yet
+                  </h3>
+                  <p className="text-base text-gray-600 dark:text-gray-400">
                     This instructor hasn't published any courses yet.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {courses.map((course) => {
                   const courseData = convertToCourseData(course);
                   return (
@@ -276,6 +288,7 @@ const TeacherDetail = () => {
               </div>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>
