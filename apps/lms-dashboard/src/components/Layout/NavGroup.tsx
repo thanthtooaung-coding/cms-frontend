@@ -26,25 +26,60 @@ import {
   DropdownMenuTrigger,
 } from '@cms/ui/components/dropdown-menu';
 
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import type { NavCollapsible, NavGroup, NavItem, NavLink } from './types';
 
 export function NavGroup({ title, items }: NavGroup) {
   const { state } = useSidebar();
   const href = useLocation().pathname ?? '';
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  
+  // Helper function to make URLs tenant-aware
+  const makeTenantUrl = (url: string | undefined): string | undefined => {
+    if (!url) return url;
+    if (!tenantSlug) return url;
+    // If URL is absolute (starts with /), prepend /lms/tenantSlug
+    if (url.startsWith('/')) {
+      // For root path, return /lms/tenantSlug
+      if (url === '/') {
+        return `/lms/${tenantSlug}`;
+      }
+      return `/lms/${tenantSlug}${url}`;
+    }
+    // If relative, just return as is (React Router will handle it)
+    return url;
+  };
+  
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const key = `${item.title}-${item.url}`;
+          const key = `${item.title}-${item.url || 'no-url'}`;
+          
+          // Handle items with url (NavLink)
+          if ('url' in item && item.url) {
+            const tenantItem = { ...item, url: makeTenantUrl(item.url) };
+            return <SidebarMenuLink key={key} item={tenantItem} href={href} />;
+          }
+          
+          // Handle collapsible items (NavCollapsible) - they have items but no url
+          if ('items' in item && item.items) {
+            const tenantItem = {
+              ...item,
+              items: item.items.map(subItem => ({
+                ...subItem,
+                url: makeTenantUrl(subItem.url)
+              }))
+            };
 
-          if (!item.items) return <SidebarMenuLink key={key} item={item} href={href} />;
+            if (state === 'collapsed')
+              return <SidebarMenuCollapsedDropdown key={key} item={tenantItem} href={href} />;
 
-          if (state === 'collapsed')
-            return <SidebarMenuCollapsedDropdown key={key} item={item} href={href} />;
-
-          return <SidebarMenuCollapsible key={key} item={item} href={href} />;
+            return <SidebarMenuCollapsible key={key} item={tenantItem} href={href} />;
+          }
+          
+          return null;
         })}
       </SidebarMenu>
     </SidebarGroup>
@@ -140,10 +175,37 @@ const SidebarMenuCollapsedDropdown = ({ item, href }: { item: NavCollapsible; hr
 };
 
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
-  return (
-    href === item.url ||
-    href.split('?')[0] === item.url ||
-    !!item?.items?.some((i) => i.url === href) ||
-    (mainNav && href.split('/')[1] === item?.url)
-  );
+  const hrefPath = href.split('?')[0];
+  
+  // For items with url (NavLink)
+  if ('url' in item && item.url) {
+    const itemPath = typeof item.url === 'string' ? item.url.split('?')[0] : '';
+    return (
+      hrefPath === itemPath ||
+      hrefPath === itemPath + '/' ||
+      itemPath === hrefPath + '/'
+    );
+  }
+  
+  // For collapsible items (NavCollapsible) - check sub-items
+  if ('items' in item && item.items) {
+    const hasActiveSubItem = item.items.some((i) => {
+      if (!i.url) return false;
+      const subPath = typeof i.url === 'string' ? i.url.split('?')[0] : '';
+      return hrefPath === subPath || hrefPath === subPath + '/' || subPath === hrefPath + '/';
+    });
+    
+    if (mainNav) {
+      // For main nav, also check if href ends with any sub-item path
+      return hasActiveSubItem || item.items.some((i) => {
+        if (!i.url) return false;
+        const subPath = typeof i.url === 'string' ? i.url.split('?')[0] : '';
+        return hrefPath.endsWith(subPath);
+      });
+    }
+    
+    return hasActiveSubItem;
+  }
+  
+  return false;
 }

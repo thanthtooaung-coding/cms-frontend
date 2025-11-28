@@ -17,6 +17,38 @@ const withSuspense = (Component: React.ComponentType) => (
 );
 export const router = createBrowserRouter([
   {
+    path : "/lms/:tenantSlug",
+    element : <RootLayout/>,
+    children: [
+      {
+        path : "",
+        index: true,
+        element : <HomePage/>
+      },
+      {
+        path: "my-learning", 
+        element: <MyLearningPage />
+      },
+      {
+        path: "courses",
+        element: <ExplorePage />
+      },
+      {
+        path : "course-detail",
+        element : <CourseDetail/>
+      },
+      {
+        path : "course-lesson",
+        element : <CourseLesson/>
+        
+      },
+      {
+        path : "teacher/:id",
+        element : <TeacherDetail/>
+      }
+    ]
+  },
+  {
     path : "/",
     element : <RootLayout/>,
     children: [

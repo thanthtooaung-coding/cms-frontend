@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTenantNavigate } from '../../../hooks/useTenantNavigate';
 import type { InstructorDataType } from '../data/schema';
 import { ConfirmDialog } from '@cms/ui/components/comfirm-dialog';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { Label } from '@cms/ui/components/label';
 import { Input } from '@cms/ui/components/input';
 import { Alert, AlertDescription, AlertTitle } from '@cms/ui/components/alert';
+import { lmsApiFetch } from '../../../utils/apiClient';
 
 interface Props {
   open: boolean;
@@ -16,7 +17,7 @@ interface Props {
 export function InstructorDeleteDialog({ open, onOpenChange, currentRow }: Props) {
   const [value, setValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
 
   //   const deleteMutation = useMutation({
   //     mutationFn: deleteBrand,
@@ -37,7 +38,7 @@ export function InstructorDeleteDialog({ open, onOpenChange, currentRow }: Props
 
       if (value.trim() !== currentRow.name) return;
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${instructorID}`, {
+      const response = await lmsApiFetch(`/users/${instructorID}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export function InstructorDeleteDialog({ open, onOpenChange, currentRow }: Props
 
       // Close dialog and navigate back to instructor list
       onOpenChange(false);
-      navigate('/instructor');
+      navigate('instructor');
     } catch (error) {
       console.error('Delete error:', error);
       alert('Failed to delete instructor. Please try again.');

@@ -1,39 +1,45 @@
 import { useCategory } from '../context/category-context';
-
 import { CategoryDeleteDialog } from './category-delete-dialog';
+import { CategoryEditDialog } from './category-edit-dialog';
 
 export function OwnerDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useCategory();
+  
+  const handleDialogClose = (dialogType: 'edit' | 'delete') => {
+    setOpen(dialogType);
+    setTimeout(() => {
+      setCurrentRow(null);
+    }, 500);
+  };
+
   return (
     <>
-      {/* <OwnerActionDialog
-        key="owner-add"
-        open={open === 'add'}
-        onOpenChange={(isOpen) => setOpen(isOpen ? 'add' : null)}
-      /> */}
-
       {currentRow && (
         <>
-          {/* <BrandActionDialog
-            key={`brand-edit-${currentRow.id}`}
+          <CategoryEditDialog
+            key={`category-edit-${currentRow.id}`}
             open={open === 'edit'}
-            onOpenChange={() => {
-              setOpen('edit');
-              setTimeout(() => {
-                setCurrentRow(null);
-              }, 500);
+            onOpenChange={(isOpen) => {
+              if (!isOpen) {
+                handleDialogClose('edit');
+              }
             }}
             currentRow={currentRow}
-          /> */}
+            onSuccess={() => {
+              // Refresh the page to update the list
+              window.location.reload();
+            }}
+          />
 
           <CategoryDeleteDialog
-            key={`owner-delete-${currentRow.id}`}
+            key={`category-delete-${currentRow.id}`}
             open={open === 'delete'}
-            onOpenChange={() => {
-              setOpen('delete');
-              setTimeout(() => {
-                setCurrentRow(null);
-              }, 500);
+            onOpenChange={(isOpen) => {
+              if (!isOpen) {
+                handleDialogClose('delete');
+              } else {
+                setOpen('delete');
+              }
             }}
             currentRow={currentRow}
           />

@@ -4,11 +4,23 @@ import { DataTableColumnHeader } from '@cms/ui/components/data-table-column-head
 import { DataTableRowActions } from './data-table-row-actions';
 import { Checkbox } from '@cms/ui/components/checkbox';
 import { Link } from 'react-router-dom';
+import { Button } from '@cms/ui/components/button';
 import type { Course } from '../data/schema';
 
 const slugify = (str : string) => str.toLowerCase().replace(/\s+/g, '-');
 
-export const columns: ColumnDef<Course>[] = [
+// Helper function to make URLs tenant-aware
+const makeTenantUrl = (path: string, tenantSlug?: string): string => {
+  if (!tenantSlug) return path;
+  if (path.startsWith(`/lms/${tenantSlug}`)) return path;
+  if (path.startsWith('/')) return `/lms/${tenantSlug}${path}`;
+  return path;
+};
+
+export const createColumns = (
+  tenantSlug?: string,
+  onCategoryClick?: (categoryId: number) => void
+): ColumnDef<Course>[] => [
   {
     accessorKey: 'select',
     header: ({ table }) => (
@@ -62,7 +74,7 @@ export const columns: ColumnDef<Course>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <div className="flex flex-col gap-1 min-w-0">
-        <Link to={`/course/${row.original.id}`} className="font-semibold text-base break-words whitespace-normal leading-tight max-w-48 text-blue-600 hover:underline">
+        <Link to={makeTenantUrl(`/course/${row.original.id}`, tenantSlug)} className="font-semibold text-base break-words whitespace-normal leading-tight max-w-48 text-blue-600 hover:underline">
             {row.original.title}
           </Link>
         </div>
@@ -103,16 +115,29 @@ export const columns: ColumnDef<Course>[] = [
   {
     accessorKey: 'category',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <Link
-          to={`/category/${slugify(row.original.category)}`}
-          className="text-base leading-tight max-w-48 text-blue-600 hover:underline break-words"
-        >
-          <span className=" text-base leading-tight max-w-48">{row.original.category}</span>
-        </Link>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const categoryId = (row.original as any).categoryId;
+      return (
+        <div className="flex items-center gap-3">
+          {categoryId && onCategoryClick ? (
+            <Button
+              variant="link"
+              className="text-base leading-tight max-w-48 text-blue-600 hover:underline break-words p-0 h-auto font-normal"
+              onClick={() => onCategoryClick(categoryId)}
+            >
+              <span className="text-base leading-tight max-w-48">{row.original.category}</span>
+            </Button>
+          ) : (
+            <Link
+              to={makeTenantUrl(`/category/${slugify(row.original.category)}`, tenantSlug)}
+              className="text-base leading-tight max-w-48 text-blue-600 hover:underline break-words"
+            >
+              <span className="text-base leading-tight max-w-48">{row.original.category}</span>
+            </Link>
+          )}
+        </div>
+      );
+    },
     size: 300,
   },
   {
@@ -122,7 +147,7 @@ export const columns: ColumnDef<Course>[] = [
       <div className="flex items-center gap-3">
         {row.original.instructorId ? (
           <Link
-            to={`/instructor/${row.original.instructorId}`}
+            to={makeTenantUrl(`/instructor/${row.original.instructorId}`, tenantSlug)}
             className="text-base leading-tight max-w-48 text-blue-600 hover:underline"
           >
             <span className="text-base leading-tight max-w-48">{row.original.instructor}</span>
@@ -187,4 +212,6 @@ export const columns: ColumnDef<Course>[] = [
   },
 ];
 
+// Default export for backward compatibility
+export const columns = createColumns();
 export default columns;

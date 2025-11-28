@@ -13,6 +13,7 @@ const Instructor = lazy(() => import('./features/instructor/app'));
 const Enrollment = lazy(() => import('./features/enrollment/app'));
 const CourseDetail = lazy(() => import('./features/course/components/CourseDetail'));
 const CreateCategory = lazy(() => import('./features/category/components/CreateCategory'));
+const EditCategory = lazy(() => import('./features/category/components/EditCategory'));
 const CreateCourse = lazy(() => import('./features/course/form/CreateCourse'));
 const EditCourse = lazy(() => import('./features/course/form/EditCourse'));
 const InstructorDetail = lazy(() => import('./features/instructor/components/InstructorDetail'));
@@ -26,19 +27,17 @@ const withSuspense = (Component: React.ComponentType) => (
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/lms/:tenantSlug',
     element: <AuthenticatedLayout />,
     children: [
       {
-        path: '/',
         index: true,
         element: withSuspense(Dashboard),
       },
       {
-        path: '/course',
+        path: 'course',
         children: [
           {
-            path: '',
             index: true,
             element: (
               <Suspense fallback={<p>Loading...</p>}>
@@ -62,10 +61,9 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: '/category',
+        path: 'category',
         children: [
           {
-            path: '',
             index: true,
             element: withSuspense(Category),
           },
@@ -75,15 +73,14 @@ export const router = createBrowserRouter([
           },
           {
             path: ':id/edit',
-            element: <p>Edit Category</p>,
+            element: withSuspense(EditCategory),
           },
         ],
       },
       {
-        path: '/instructor',
+        path: 'instructor',
         children: [
           {
-            path: '',
             index: true,
             element: withSuspense(Instructor),
           },
@@ -102,10 +99,9 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: '/enrollment',
+        path: 'enrollment',
         children: [
           {
-            path: '',
             index: true,
             element: withSuspense(Enrollment),
             loader: EnrollmentLoader,
@@ -121,6 +117,10 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: '/lms/:tenantSlug/login',
+    element: <LoginAuthForm />,
   },
   {
     path: '/login',

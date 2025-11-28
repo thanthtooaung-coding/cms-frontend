@@ -3,6 +3,8 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Header from './LandingPage/Header';
 import Footer from './LandingPage/Footer';
 import SubNavigation from './SubNavigation';
+import { TenantProvider } from '../context/TenantContext';
+
 const RootLayout = () => {
   const { pathname } = useLocation();
 
@@ -14,14 +16,16 @@ const RootLayout = () => {
   }, [pathname]);
 
   return (
-    <div className="container mx-auto ">
-      <main>
-        <Header />
-        <SubNavigation/>
-        <Outlet />
-        <Footer />
-      </main>
-    </div>
+    <TenantProvider>
+      <div className="container mx-auto ">
+        <main>
+          <Header />
+          <SubNavigation/>
+          <Outlet />
+          <Footer />
+        </main>
+      </div>
+    </TenantProvider>
   );
 };
 

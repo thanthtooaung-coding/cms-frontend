@@ -11,37 +11,52 @@ import { CategoryProvider } from './context/category-context';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import type { CategoryType } from './data/schema';
+import { lmsApiFetch } from '../../utils/apiClient';
 
 const CategoryApp = () => {
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-        const data = await response.json();
-        const formattedData = data.map((cat: any) => ({
-            id: cat.id.toString(),
-            name: cat.name,
-            description: cat.description,
-            createdAt: new Date(cat.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        }));
-        setCategories(formattedData);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await lmsApiFetch('/categories');
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories');
       }
-    };
+      const data = await response.json();
+      const formattedData = data.map((cat: any) => ({
+          id: cat.id.toString(),
+          name: cat.name,
+          description: cat.description,
+          createdAt: new Date(cat.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      }))
+      .sort((a: CategoryType, b: CategoryType) => parseInt(a.id) - parseInt(b.id)); // Sort by ID
+      setCategories(formattedData);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCategories();
+  }, []);
+
+  // Expose refresh function to context or use a refresh trigger
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchCategories();
+    };
+    
+    // Listen for custom refresh event
+    window.addEventListener('category-refresh', handleRefresh);
+    return () => {
+      window.removeEventListener('category-refresh', handleRefresh);
+    };
   }, []);
 
 

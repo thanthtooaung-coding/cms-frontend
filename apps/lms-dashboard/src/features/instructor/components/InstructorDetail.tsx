@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { useTenantNavigate, useTenantUrl } from '../../../hooks/useTenantNavigate';
 import { Header } from '../../../components/Layout/Header';
 import { Main } from '../../../components/Layout/main';
 import { ProfileDropdown } from '../../../components/profile-dropdown';
 import { Search } from '../../../components/search';
+import { lmsApiFetch } from '../../../utils/apiClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cms/ui/components/card';
 import { Badge } from '@cms/ui/components/badge';
 import { Button } from '@cms/ui/components/button';
@@ -64,7 +66,8 @@ interface CourseResponse {
 
 const InstructorDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
+  const getTenantUrl = useTenantUrl();
   const [teacher, setTeacher] = useState<TeacherResponse | null>(null);
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,11 +87,11 @@ const InstructorDetail = () => {
 
         const instructorId = parseInt(id, 10);
         const [teacherData, allCourses] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${instructorId}`).then(res => {
+          lmsApiFetch(`/users/${instructorId}`).then(res => {
             if (!res.ok) throw new Error('Failed to fetch instructor');
             return res.json();
           }),
-          fetch(`${import.meta.env.VITE_API_BASE_URL}/courses`).then(res => {
+          lmsApiFetch('/courses').then(res => {
             if (!res.ok) throw new Error('Failed to fetch courses');
             return res.json();
           }),
@@ -184,7 +187,7 @@ const InstructorDetail = () => {
               <p className="text-muted-foreground">View and manage instructor information</p>
             </div>
             <div className="ml-auto flex gap-2">
-              <Link to={`/instructor/${id}/edit`}>
+              <Link to={getTenantUrl(`/instructor/${id}/edit`)}>
                 <Button variant="outline">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
@@ -309,7 +312,7 @@ const InstructorDetail = () => {
                               <div className="flex-1">
                                 <CardTitle className="text-lg mb-2">
                                   <Link
-                                    to={`/course/${course.id}`}
+                                    to={getTenantUrl(`/course/${course.id}`)}
                                     className="hover:text-purple-600 transition-colors"
                                   >
                                     {course.title}
@@ -327,10 +330,10 @@ const InstructorDetail = () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem asChild>
-                                    <Link to={`/course/${course.id}`}>View Details</Link>
+                                    <Link to={getTenantUrl(`/course/${course.id}`)}>View Details</Link>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem asChild>
-                                    <Link to={`/course/${course.id}/edit`}>Edit Course</Link>
+                                    <Link to={getTenantUrl(`/course/${course.id}/edit`)}>Edit Course</Link>
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>

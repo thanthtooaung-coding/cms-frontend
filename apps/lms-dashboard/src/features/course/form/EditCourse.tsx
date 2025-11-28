@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { useTenantNavigate } from '../../../hooks/useTenantNavigate';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { lmsApiFetch } from '../../../utils/apiClient';
 
 // UI Components
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@cms/ui/components/form';
@@ -95,7 +97,7 @@ const ModuleForm = ({ moduleIndex, control, removeModule }: { moduleIndex: numbe
 // --- Main EditCourse Component ---
 const EditCourse = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
   
   const [categories, setCategories] = useState<Category[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
@@ -118,10 +120,10 @@ const EditCourse = () => {
         try {
           setLoading(true);
           const [courseRes, categoriesRes, instructorsRes, allModulesRes] = await Promise.all([
-            fetch(`${import.meta.env.VITE_API_BASE_URL}/courses/${id}`),
-            fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`),
-            fetch(`${import.meta.env.VITE_API_BASE_URL}/users?role=Staff`),
-            fetch(`${import.meta.env.VITE_API_BASE_URL}/modules`),
+            lmsApiFetch(`/courses/${id}`),
+            lmsApiFetch('/categories'),
+            lmsApiFetch('/users?role=Staff'),
+            lmsApiFetch('/modules'),
           ]);
   
           if (!courseRes.ok) throw new Error('Failed to fetch course data.');
@@ -138,7 +140,7 @@ const EditCourse = () => {
   
           const modulesWithLessons = await Promise.all(
             courseModules.map(async (module) => {
-              const lessonsRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lessons/modules/${module.id}`);
+              const lessonsRes = await lmsApiFetch(`/lessons/modules/${module.id}`);
               const lessons: ApiLesson[] = await lessonsRes.json();
               return { id: module.id, name: module.name, description: module.description, lessons };
             })
@@ -154,7 +156,9 @@ const EditCourse = () => {
             instructorId: courseData.instructor.id,
             // Provide defaults for fields not in the GET response
             durationDayCount: courseData.durationDayCount || 30, 
-            status: courseData.status || 'Pending',
+            status: courseData.status 
+              ? courseData.status.charAt(0).toUpperCase() + courseData.status.slice(1).toLowerCase()
+              : 'Pending',
             modules: modulesWithLessons,
           });
   
@@ -174,7 +178,7 @@ const EditCourse = () => {
 
     try {
         // --- Step 1: Update Core Course Details ---
-        await fetch(`${import.meta.env.VITE_API_BASE_URL}/courses/${courseId}`, {
+        await lmsApiFetch(`/courses/${courseId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -195,14 +199,14 @@ const EditCourse = () => {
         // Deletions: Find modules that were in the original data but not in the submission
         const moduleIdsToDelete = originalModuleIds.filter(originalId => !submittedModuleIds.includes(originalId));
         const deleteModulePromises = moduleIdsToDelete.map(moduleId => 
-            fetch(`${import.meta.env.VITE_API_BASE_URL}/modules/${moduleId}`, { method: 'DELETE' })
+            lmsApiFetch(`/modules/${moduleId}`, { method: 'DELETE' })
         );
 
         // Updates and Creations
         const syncModulePromises = submittedModules.map(async (module) => {
             if (module.id) { // --- UPDATE existing module ---
                 const moduleId = module.id;
-                await fetch(`${import.meta.env.VITE_API_BASE_URL}/modules/${moduleId}`, {
+                await lmsApiFetch(`/modules/${moduleId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: module.name, description: module.description }),
@@ -215,17 +219,17 @@ const EditCourse = () => {
 
                 const lessonIdsToDelete = originalLessonIds.filter(originalId => !submittedLessonIds.includes(originalId));
                 const deleteLessonPromises = lessonIdsToDelete.map(lessonId => 
-                    fetch(`${import.meta.env.VITE_API_BASE_URL}/lessons/${lessonId}`, { method: 'DELETE' })
+                    lmsApiFetch(`/lessons/${lessonId}`, { method: 'DELETE' })
                 );
 
                 const syncLessonPromises = module.lessons.map(async (lesson) => {
                     if (lesson.id) { // Update lesson
-                        return fetch(`${import.meta.env.VITE_API_BASE_URL}/lessons/${lesson.id}`, {
+                        return lmsApiFetch(`/lessons/${lesson.id}`, {
                             method: 'PUT', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ title: lesson.title, content: lesson.content, materialType: lesson.materialType }),
                         });
                     } else { // Create lesson
-                        return fetch(`${import.meta.env.VITE_API_BASE_URL}/lessons`, {
+                        return lmsApiFetch('/lessons', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ ...lesson, moduleId }),
                         });
@@ -235,7 +239,7 @@ const EditCourse = () => {
                 await Promise.all([...deleteLessonPromises, ...syncLessonPromises]);
 
             } else { // --- CREATE new module ---
-                const moduleRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/modules`, {
+                const moduleRes = await lmsApiFetch('/modules', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: module.name, description: module.description, courseId }),
@@ -245,7 +249,7 @@ const EditCourse = () => {
 
                 // Create all lessons for this new module
                 const createLessonPromises = module.lessons.map(lesson => 
-                    fetch(`${import.meta.env.VITE_API_BASE_URL}/lessons`, {
+                    lmsApiFetch('/lessons', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ ...lesson, moduleId: newModuleId }),
                     })

@@ -2,7 +2,8 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useTenantNavigate } from '../../../hooks/useTenantNavigate';
+import { lmsApiFetch } from '../../../utils/apiClient';
 
 // UI Components
 import {
@@ -187,7 +188,7 @@ const ModuleForm = ({
 const CreateCourse = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [instructors, setInstructors] = useState<any[]>([]);
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
 
   const form = useForm<CreateCourseData>({
     resolver: zodResolver(CourseSchema),
@@ -201,7 +202,7 @@ const CreateCourse = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`);
+        const response = await lmsApiFetch('/categories');
         if (!response.ok) {
           throw new Error('Failed to fetch categories');
         }
@@ -214,7 +215,7 @@ const CreateCourse = () => {
 
     const fetchInstructors = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?role=Staff`);
+        const response = await lmsApiFetch('/users?role=Staff');
         if (!response.ok) {
           throw new Error('Failed to fetch instructors');
         }
@@ -241,7 +242,7 @@ const CreateCourse = () => {
   const onSubmit = async (data: CreateCourseData) => {
     try {
       // 1. Create Course
-      const courseRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/courses`, {
+      const courseRes = await lmsApiFetch('/courses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -259,7 +260,7 @@ const CreateCourse = () => {
   
       // 2. Create Modules
       for (const module of data.modules) {
-        const moduleRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/modules`, {
+        const moduleRes = await lmsApiFetch('/modules', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -275,7 +276,7 @@ const CreateCourse = () => {
   
         // 3. Create Lessons
         for (const lesson of module.lessons) {
-          const lessonRes = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lessons`, {
+          const lessonRes = await lmsApiFetch('/lessons', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -290,7 +291,7 @@ const CreateCourse = () => {
         }
       }
   
-      navigate('/course');
+      navigate('course');
     } catch (error) {
       console.error(error);
     }
@@ -423,7 +424,7 @@ const CreateCourse = () => {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => navigate('/course')}>
+            <Button type="button" variant="outline" onClick={() => navigate('course')}>
               Cancel
             </Button>
             <Button type="submit">Create Course</Button>

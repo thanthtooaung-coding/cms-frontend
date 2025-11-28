@@ -37,14 +37,16 @@ export function CourseDialogs() {
           <CourseStatusChangeDialog
             key={`course-status-change-${currentRow.id}`}
             open={open === 'change-status'}
-            onOpenChange={() => {
-              setOpen('change-status');
-              setTimeout(() => {
-                setCurrentRow(null);
-              }, 500);
+            onOpenChange={(isOpen) => {
+              setOpen(isOpen ? 'change-status' : null);
+              if (!isOpen) {
+                setTimeout(() => {
+                  setCurrentRow(null);
+                }, 500);
+              }
             }}
             currentRow={currentRow}
-          />p
+          />
 
           <CourseDeleteDialog
             key={`course-delete-${currentRow.id}`}

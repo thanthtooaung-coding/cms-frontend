@@ -2,7 +2,8 @@ import { Button } from '@cms/ui/components/button';
 import { Input } from '@cms/ui/components/input';
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useTenantNavigate } from '../../../hooks/useTenantNavigate';
+import { lmsApiFetch } from '../../../utils/apiClient';
 
 const CreateInstructor = () => {
   const [name, setName] = useState('');
@@ -14,7 +15,7 @@ const CreateInstructor = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,13 @@ const CreateInstructor = () => {
     setError(null);
 
     try {
+      const tenantId = localStorage.getItem('tenant_id');
+      if (!tenantId) {
+        setError('Tenant information not available');
+        setIsSubmitting(false);
+        return;
+      }
+
       const newInstructor = {
         name,
         email,
@@ -30,10 +38,10 @@ const CreateInstructor = () => {
         address,
         phoneNumber,
         roleId: 3,
-        tenantId: 1,
+        tenantId: parseInt(tenantId),
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users`, {
+      const response = await lmsApiFetch('/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

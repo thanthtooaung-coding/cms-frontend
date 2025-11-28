@@ -1,25 +1,32 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Header } from '../../components/Layout/Header';
 import { Main } from '../../components/Layout/main';
 import { ProfileDropdown } from '../../components/profile-dropdown';
 import { Search } from '../../components/search';
 import { DataTable } from './components/data-table';
-import columns from './components/column';
+import { createColumns } from './components/column';
 import { CourseDialogs } from './actions/course-dialog';
-import { CourseProvider } from './context/course-context';
+import { CourseProvider, useCourse } from './context/course-context';
 import { AddCourse } from './actions/add-course-btn';
+import { CategoryDetailModal } from './components/category-detail-modal';
 import type { Course } from './data/schema';
+import { lmsApiFetch } from '../../utils/apiClient';
 
 const CourseApp = () => {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
+  const { refreshTrigger } = useCourse();
   const [data, setData] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/courses`);
+        const response = await lmsApiFetch('/courses');
         if (!response.ok) {
           throw new Error('Failed to fetch courses');
         }
@@ -30,6 +37,7 @@ const CourseApp = () => {
           title: course.title,
           description: course.description,
           category: course.category.name,
+          categoryId: course.category.id, // Store category ID for modal
           instructor: course.instructor.name,
           instructorId: course.instructor.id, // Store instructor ID for linking
           createdAt: new Date(course.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
@@ -45,13 +53,13 @@ const CourseApp = () => {
       }
     };
     fetchCourses();
-  }, []);
+  }, [refreshTrigger]);
 
   if (loading) return <div className="flex justify-center items-center h-screen"><p>Loading courses...</p></div>;
   if (error) return <div className="flex justify-center items-center h-screen"><p>Error fetching courses: {error}</p></div>;
 
   return (
-    <CourseProvider>
+    <>
       <Header>
         <Search />
         <div className="ml-auto flex items-center gap-4">
@@ -69,14 +77,33 @@ const CourseApp = () => {
           </div>
 
           <div>
-            <DataTable data={data} columns={columns} />
+            <DataTable 
+              data={data} 
+              columns={createColumns(tenantSlug, (categoryId: number) => {
+                setSelectedCategoryId(categoryId);
+                setCategoryModalOpen(true);
+              })} 
+            />
             <CourseDialogs />
+            <CategoryDetailModal
+              open={categoryModalOpen}
+              onOpenChange={setCategoryModalOpen}
+              categoryId={selectedCategoryId}
+            />
           </div>
           
         </div>
       </Main>
+    </>
+  );
+};
+
+const CourseAppWithProvider = () => {
+  return (
+    <CourseProvider>
+      <CourseApp />
     </CourseProvider>
   );
 };
 
-export default CourseApp;
+export default CourseAppWithProvider;

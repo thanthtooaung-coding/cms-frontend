@@ -252,7 +252,7 @@ export default function ProfilePage() {
             <CardDescription>Manage and access your requested pages</CardDescription>
           </CardHeader>
           <CardContent>
-            {profile.pageRequests.length === 0 ? (
+            {!profile.pageRequests || profile.pageRequests.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-slate-600 mb-4">You haven't submitted any page requests yet.</p>
                 <Button onClick={() => navigate('/page-request')}>

@@ -7,6 +7,7 @@ import columns from './components/column';
 import { DataTable } from './components/data-table';
 import { EnrollmentProvider } from './context/enrollment-context';
 import type { EnrollmentType } from './data/schema';
+import { lmsApiFetch } from '../../utils/apiClient';
 
 const EnrollmentApp = () => {
   const [enrollmentData, setEnrollmentData] = useState<EnrollmentType[]>([]);
@@ -17,7 +18,7 @@ const EnrollmentApp = () => {
     const fetchEnrollments = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/enrollments`);
+        const response = await lmsApiFetch('/enrollments');
         if (!response.ok) {
           throw new Error('Failed to fetch enrollments');
         }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { useTenantNavigate } from '../../../hooks/useTenantNavigate';
 import { Button } from '@cms/ui/components/button';
 import { Input } from '@cms/ui/components/input';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Header } from '../../../components/Layout/Header';
 import { Main } from '../../../components/Layout/main';
 import { ProfileDropdown } from '../../../components/profile-dropdown';
 import { Search } from '../../../components/search';
+import { lmsApiFetch } from '../../../utils/apiClient';
 
 interface UserResponse {
   id: number;
@@ -27,7 +29,7 @@ interface UserResponse {
 
 const EditInstructor = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
@@ -48,7 +50,7 @@ const EditInstructor = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${id}`);
+        const response = await lmsApiFetch(`/users/${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch instructor');
         }
@@ -85,7 +87,7 @@ const EditInstructor = () => {
         roleId: 3, // Staff role ID - adjust if needed
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/${id}`, {
+      const response = await lmsApiFetch(`/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +100,7 @@ const EditInstructor = () => {
         throw new Error(errorData.message || 'Failed to update instructor');
       }
 
-      navigate(`/instructor/${id}`);
+      navigate(`instructor/${id}`);
     } catch (err: any) {
       setError(err.message || 'Failed to update instructor');
     } finally {

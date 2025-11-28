@@ -11,9 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@cms/ui/components/dropdown-menu';
 import { Form, Link } from 'react-router';
+import { useTenantUrl } from '../hooks/useTenantNavigate';
 // import { useAuthDataStore } from '../store/auth-store';
 
 export function ProfileDropdown() {
+  const getTenantUrl = useTenantUrl();
   const user = {
     name: 'Brian',
     email: 'Brian@gmail.com',
@@ -38,19 +40,19 @@ export function ProfileDropdown() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link to="/settings">
+            <Link to={getTenantUrl('settings')}>
               Profile
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/settings">
+            <Link to={getTenantUrl('settings')}>
               Billing
               <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/settings">
+            <Link to={getTenantUrl('settings')}>
               Settings
               <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
             </Link>

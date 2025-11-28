@@ -9,7 +9,15 @@ import { DataTableRowActions } from './data-table-row-actions';
 import { Checkbox } from '@cms/ui/components/checkbox';
 import { Link } from 'react-router-dom';
 
-export const columns: ColumnDef<InstructorType>[] = [
+// Helper function to make URLs tenant-aware
+const makeTenantUrl = (path: string, tenantSlug?: string): string => {
+  if (!tenantSlug) return path;
+  if (path.startsWith(`/lms/${tenantSlug}`)) return path;
+  if (path.startsWith('/')) return `/lms/${tenantSlug}${path}`;
+  return path;
+};
+
+export const createColumns = (tenantSlug?: string): ColumnDef<InstructorType>[] => [
   {
     accessorKey: 'select',
     header: ({ table }) => (
@@ -44,7 +52,7 @@ export const columns: ColumnDef<InstructorType>[] = [
       <div className="flex items-center gap-3">
         <div className="flex flex-col gap-1 min-w-0">
           <Link
-            to={`/instructor/${row.original.id}`}
+            to={makeTenantUrl(`/instructor/${row.original.id}`, tenantSlug)}
             className="font-semibold text-base leading-tight max-w-48 hover:text-purple-600 transition-colors"
           >
             {row.original.name}
@@ -93,4 +101,6 @@ export const columns: ColumnDef<InstructorType>[] = [
   },
 ];
 
+// Default export for backward compatibility
+export const columns = createColumns();
 export default columns;

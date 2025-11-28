@@ -16,6 +16,7 @@ import {
   useSidebar,
 } from '@cms/ui/components/sidebar';
 import { Form, Link } from 'react-router';
+import { useTenantUrl } from '../../hooks/useTenantNavigate';
 
 export function NavUser({
   user,
@@ -29,6 +30,7 @@ export function NavUser({
     | any;
 }) {
   const { isMobile } = useSidebar();
+  const getTenantUrl = useTenantUrl();
 
   return (
     <SidebarMenu>
@@ -81,19 +83,19 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link to="/settings/account">
+                <Link to={getTenantUrl('settings/account')}>
                   <BadgeCheck />
                   Account
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings">
+                <Link to={getTenantUrl('settings')}>
                   <CreditCard />
                   Billing
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings/notifications">
+                <Link to={getTenantUrl('settings/notifications')}>
                   <Bell />
                   Notifications
                 </Link>

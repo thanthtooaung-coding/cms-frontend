@@ -12,12 +12,12 @@ import {
 } from '@cms/ui/components/command';
 
 import { ScrollArea } from '@cms/ui/components/scroll-area';
-import { useNavigate } from 'react-router';
+import { useTenantNavigate } from '../hooks/useTenantNavigate';
 import { useSearch } from '../context/search-context';
 import { sidebarData } from './Layout/data/sidebar-data';
 
 export function CommandMenu() {
-  const navigate = useNavigate();
+  const navigate = useTenantNavigate();
 
   const { open, setOpen } = useSearch();
 

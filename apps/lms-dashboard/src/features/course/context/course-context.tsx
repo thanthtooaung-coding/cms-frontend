@@ -10,6 +10,8 @@ interface CourseContextType {
   setOpen: (str: courseDialogType | null) => void;
   currentRow: Course | null;
   setCurrentRow: React.Dispatch<React.SetStateAction<Course | null>>;
+  refreshTrigger: number;
+  triggerRefresh: () => void;
 }
 
 const CourseContext = createContext<CourseContextType | null>(null);
@@ -21,6 +23,7 @@ interface courseProps {
 export const CourseProvider: React.FC<courseProps> = ({ children }) => {
   // Use the new custom hook
   const { open, setOpen, currentRow, setCurrentRow } = useCrudDialog<Course>();
+  const [refreshTrigger, setRefreshTrigger] = React.useState(0);
 
   const setCurrentRowCompat: React.Dispatch<React.SetStateAction<Course | null>> = (value) => {
     if (typeof value === 'function') {
@@ -31,11 +34,17 @@ export const CourseProvider: React.FC<courseProps> = ({ children }) => {
     }
   };
 
+  const triggerRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   const value: CourseContextType = {
     open,
     setOpen,
     currentRow,
     setCurrentRow: setCurrentRowCompat,
+    refreshTrigger,
+    triggerRefresh,
   };
 
   return <CourseContext.Provider value={value}>{children}</CourseContext.Provider>;

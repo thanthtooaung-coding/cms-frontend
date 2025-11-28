@@ -4,6 +4,8 @@ import { IconAlertTriangle } from '@tabler/icons-react';
 import { Label } from '@cms/ui/components/label';
 import { Alert, AlertDescription, AlertTitle } from '@cms/ui/components/alert';
 import { Loader2 } from 'lucide-react';
+import { lmsApiFetch } from '../../../utils/apiClient';
+import { useCourse } from '../context/course-context';
 
 interface Props {
   open: boolean;
@@ -27,6 +29,7 @@ const statusColorMap: Record<string, { bg: string; border: string; text: string 
 
 
 export function CourseStatusChangeDialog({ open, onOpenChange, currentRow }: Props) {
+  const { triggerRefresh } = useCourse();
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export function CourseStatusChangeDialog({ open, onOpenChange, currentRow }: Pro
       setError(null);
       if (!selectedOption) return;
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/courses/${id}/status`, {
+      const response = await lmsApiFetch(`/courses/${id}/status`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -59,7 +62,8 @@ export function CourseStatusChangeDialog({ open, onOpenChange, currentRow }: Pro
       }
 
       onOpenChange(false);
-      // You might want to refresh the course list here
+      // Refresh the course list
+      triggerRefresh();
     } catch (err: any) {
         setError(err.message);
     } finally {

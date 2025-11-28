@@ -2,39 +2,36 @@ import { useState } from 'react';
 import type { CategoryDataType } from '../data/schema';
 import { ConfirmDialog } from '@cms/ui/components/comfirm-dialog';
 import { IconAlertTriangle } from '@tabler/icons-react';
-import { Label } from '@cms/ui/components/label';
-import { Input } from '@cms/ui/components/input';
 import { Alert, AlertDescription, AlertTitle } from '@cms/ui/components/alert';
 import { lmsApiFetch } from '../../../utils/apiClient';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentRow: CategoryDataType;
+  selectedCategories: CategoryDataType[];
 }
 
-export function CategoryDeleteDialog({ open, onOpenChange, currentRow }: Props) {
-  const [value, setValue] = useState('');
+export function CategoryBulkDeleteDialog({ open, onOpenChange, selectedCategories }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = async (categoryID: string) => {
+  const handleDelete = async () => {
     try {
       setIsSubmitting(true);
       setError(null);
 
-      if (value.trim() !== currentRow.name) {
-        setError("The entered name does not match the category's name.");
-        return;
-      };
-
-      const response = await lmsApiFetch(`/categories/${categoryID}`, {
+      const ids = selectedCategories.map(cat => parseInt(cat.id));
+      const response = await lmsApiFetch('/categories/bulk', {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.message || errorData.error || 'Failed to delete category';
+        const errorMessage = errorData.message || errorData.error || 'Failed to delete categories';
         throw new Error(errorMessage);
       }
 
@@ -42,48 +39,48 @@ export function CategoryDeleteDialog({ open, onOpenChange, currentRow }: Props) 
       // Trigger refresh event
       window.dispatchEvent(new Event('category-refresh'));
     } catch (err: any) {
-        setError(err.message);
+      setError(err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const categoryNames = selectedCategories.map(cat => cat.name).join(', ');
 
   return (
     <ConfirmDialog
       open={open}
       className="cursor-pointer"
       onOpenChange={onOpenChange}
-      handleConfirm={() => handleDelete(currentRow.id)}
-      disabled={value.trim() !== currentRow.name || isSubmitting}
+      handleConfirm={handleDelete}
+      disabled={isSubmitting}
       title={
         <span className="text-destructive">
           <IconAlertTriangle className="mr-1 inline-block stroke-destructive" size={18} /> Delete
-          Category
+          Selected Categories
         </span>
       }
       desc={
         <div className="space-y-4">
           <p className="mb-2">
-            Are you sure you want to delete <span className="font-bold">{currentRow.name}</span>?
+            Are you sure you want to delete <span className="font-bold">{selectedCategories.length}</span> selected
+            categor{selectedCategories.length === 1 ? 'y' : 'ies'}?
             <br />
-            This action will permanently remove the category from the system. This cannot be undone.
+            This action will permanently remove {selectedCategories.length === 1 ? 'this category' : 'these categories'} from the system. This cannot be undone.
           </p>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {selectedCategories.length <= 3 && (
+            <div className="text-sm text-muted-foreground">
+              <strong>Categories:</strong> {categoryNames}
+            </div>
+          )}
 
-          <Label className="my-2">
-            Category Name:
-            <Input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="Enter category name to confirm deletion."
-            />
-          </Label>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <Alert variant="destructive">
             <AlertTitle>Warning!</AlertTitle>
             <AlertDescription>
-              Please be careful, this operation can not be rolled back.
+              Categories with associated courses cannot be deleted. Please remove or reassign all courses from these categories before deleting them, or use force delete instead.
             </AlertDescription>
           </Alert>
         </div>
@@ -94,3 +91,4 @@ export function CategoryDeleteDialog({ open, onOpenChange, currentRow }: Props) 
     />
   );
 }
+

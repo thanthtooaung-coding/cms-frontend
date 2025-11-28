@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Header } from '../../components/Layout/Header';
 import { Main } from '../../components/Layout/main';
 import { ProfileDropdown } from '../../components/profile-dropdown';
 import { Search } from '../../components/search';
 import { InstructorDialogs } from './actions/instructor-dialog';
-import columns from './components/column';
+import { createColumns } from './components/column';
 import { DataTable } from './components/data-table';
 import { InstructorProvider } from './context/instructor-context';
 import type { InstructorType } from './data/schema';
 import { Button } from '@cms/ui/components/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
+import { lmsApiFetch } from '../../utils/apiClient';
 
 const InstructorApp = () => {
+  const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const [data, setData] = useState<InstructorType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +24,7 @@ const InstructorApp = () => {
     const fetchInstructors = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users?role=Staff`);
+        const response = await lmsApiFetch('/users?role=Staff');
         if (!response.ok) {
           throw new Error('Failed to fetch instructors');
         }
@@ -79,7 +82,7 @@ const InstructorApp = () => {
             </Link>
           </div>
           <div>
-            <DataTable data={data} columns={columns} />
+            <DataTable data={data} columns={createColumns(tenantSlug)} />
           </div>
         </div>
       </Main>

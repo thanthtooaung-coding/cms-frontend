@@ -5,6 +5,7 @@ export interface Course {
   title: string;
   description: string;
   category: string;
+  categoryId?: number; // Add category ID for modal
   instructor: string;
   instructorId?: number; // Add instructor ID for linking
   createdAt: string; // ISO date string
