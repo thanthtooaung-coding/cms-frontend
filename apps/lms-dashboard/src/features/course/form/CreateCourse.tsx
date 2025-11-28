@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { useEffect, useState } from 'react';
 import { useTenantNavigate } from '../../../hooks/useTenantNavigate';
 import { lmsApiFetch } from '../../../utils/apiClient';
+import { useAuthDataStore } from '../../../store/auth-store';
 
 // UI Components
 import {
@@ -187,14 +188,15 @@ const ModuleForm = ({
 
 const CreateCourse = () => {
   const [categories, setCategories] = useState<any[]>([]);
-  const [instructors, setInstructors] = useState<any[]>([]);
   const navigate = useTenantNavigate();
+  const { user } = useAuthDataStore();
 
   const form = useForm<CreateCourseData>({
     resolver: zodResolver(CourseSchema),
     defaultValues: {
       title: '',
       description: '',
+      instructorId: user?.id ? Number(user.id) : undefined,
       modules: [],
     },
   });
@@ -213,22 +215,13 @@ const CreateCourse = () => {
       }
     };
 
-    const fetchInstructors = async () => {
-      try {
-        const response = await lmsApiFetch('/users?role=Staff');
-        if (!response.ok) {
-          throw new Error('Failed to fetch instructors');
-        }
-        const data = await response.json();
-        setInstructors(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     fetchCategories();
-    fetchInstructors();
-  }, []);
+    
+    // Set instructor ID when user is available
+    if (user?.id) {
+      form.setValue('instructorId', Number(user.id));
+    }
+  }, [user?.id, form]);
 
   const {
     fields: moduleFields,
@@ -291,7 +284,7 @@ const CreateCourse = () => {
         }
       }
   
-      navigate('course');
+      navigate(`/course/${courseId}`);
     } catch (error) {
       console.error(error);
     }
@@ -363,20 +356,25 @@ const CreateCourse = () => {
               <FormItem>
                 <FormLabel>Instructor</FormLabel>
                 <FormControl>
-                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                  <Select 
+                    onValueChange={(value) => field.onChange(Number(value))} 
+                    value={field.value?.toString()} 
+                    disabled={true}
+                  >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select an instructor" />
+                      <SelectValue placeholder={user?.name || 'Loading...'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {instructors.map((instructor) => (
-                        <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                          {instructor.name}
+                      {user?.id && (
+                        <SelectItem value={user.id.toString()}>
+                          {user.name}
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                 </FormControl>
                 <FormMessage />
+                <p className="text-sm text-muted-foreground">The course will be assigned to you (current logged-in user)</p>
               </FormItem>
             )}
           />
@@ -424,7 +422,7 @@ const CreateCourse = () => {
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => navigate('course')}>
+            <Button type="button" variant="outline" onClick={() => navigate('/course')}>
               Cancel
             </Button>
             <Button type="submit">Create Course</Button>

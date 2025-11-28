@@ -7,6 +7,8 @@ type User = {
   name: string;
   email: string;
   tenantId?: string;
+  role?: string;
+  roleName?: string;
 };
 
 type AuthState = {

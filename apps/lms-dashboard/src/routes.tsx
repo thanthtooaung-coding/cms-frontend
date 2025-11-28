@@ -5,6 +5,7 @@ import { LoginAuthForm } from './features/auth/components/LoginAuthForm';
 import { EnrollmentLoader } from './router/loader/data-loader';
 import { CourseLoader } from './router/loader/data-loader';
 import CreateInstructor from './features/instructor/components/CreateInstructor';
+import { RoleProtectedRoute } from './components/RoleProtectedRoute';
 
 const Dashboard = lazy(() => import('./features/dashboard/app'));
 const CourseApp = lazy(() => import('./features/course/app'));
@@ -65,15 +66,27 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: withSuspense(Category),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(Category)}
+              </RoleProtectedRoute>
+            ),
           },
           {
             path: 'create',
-            element: withSuspense(CreateCategory),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(CreateCategory)}
+              </RoleProtectedRoute>
+            ),
           },
           {
             path: ':id/edit',
-            element: withSuspense(EditCategory),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(EditCategory)}
+              </RoleProtectedRoute>
+            ),
           },
         ],
       },
@@ -82,19 +95,35 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: withSuspense(Instructor),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(Instructor)}
+              </RoleProtectedRoute>
+            ),
           },
           {
             path: 'create',
-            element: withSuspense(CreateInstructor),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(CreateInstructor)}
+              </RoleProtectedRoute>
+            ),
           },
           {
             path: ':id',
-            element: withSuspense(InstructorDetail),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(InstructorDetail)}
+              </RoleProtectedRoute>
+            ),
           },
           {
             path: ':id/edit',
-            element: withSuspense(EditInstructor),
+            element: (
+              <RoleProtectedRoute allowedRoles={['Owner', 'Admin']}>
+                {withSuspense(EditInstructor)}
+              </RoleProtectedRoute>
+            ),
           },
         ],
       },

@@ -38,7 +38,7 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem
           onClick={() => {
-            navigate(`instructor/${instructor.id}/edit`);
+            navigate(`/instructor/${instructor.id}/edit`);
           }}
         >
           Edit

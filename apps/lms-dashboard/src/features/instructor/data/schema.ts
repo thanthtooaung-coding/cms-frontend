@@ -16,12 +16,12 @@ export interface InstructorDataType {
   name_space: string;
 }
 
-export type ROLE = 'admin' | 'owner' | 'staff';
+export type ROLE = 'Admin' | 'Owner' | 'Staff' | 'Instructor';
 
 export const InstructorSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string(),
   name_space: z.string(),
-  role: z.enum(['admin', 'owner', 'staff']),
+  role: z.enum(['Admin', 'Owner', 'Staff', 'Instructor']),
 });

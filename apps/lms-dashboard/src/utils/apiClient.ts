@@ -8,6 +8,22 @@ const getLmsToken = (): string | null => {
   return localStorage.getItem('lms_token');
 };
 
+const getUserId = (): string | null => {
+  // Try to get from sessionStorage (auth store)
+  try {
+    const authStorage = sessionStorage.getItem('auth-storage');
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage);
+      if (parsed?.state?.user?.id) {
+        return parsed.state.user.id;
+      }
+    }
+  } catch (e) {
+    // Ignore parsing errors
+  }
+  return null;
+};
+
 export const lmsApiFetch = async (
   endpoint: string,
   options: RequestInit = {}
@@ -16,6 +32,7 @@ export const lmsApiFetch = async (
   const gatewayUrl = import.meta.env.VITE_BACKEND_SERVER || 'http://localhost:4001';
   const tenantId = getTenantId();
   const token = getLmsToken();
+  const userId = getUserId();
 
   // Ensure endpoint starts with / and add /api/lms prefix
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -35,6 +52,11 @@ export const lmsApiFetch = async (
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Add user ID header for role-based access control
+  if (userId) {
+    headers['X-User-Id'] = userId;
   }
 
   return fetch(urlWithTenant, {

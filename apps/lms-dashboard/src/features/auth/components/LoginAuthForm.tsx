@@ -101,6 +101,8 @@ export const LoginAuthForm = () => {
         name: result.name || result.username,
         email: result.email,
         tenantId: result.tenant?.id?.toString() || tenantId.toString(),
+        role: result.role?.name || '',
+        roleName: result.role?.name || '',
       });
 
       // Store token if provided
