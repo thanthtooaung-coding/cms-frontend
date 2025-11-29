@@ -1,9 +1,8 @@
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@cms/ui/components/avatar';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@cms/ui/components/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -15,7 +14,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@cms/ui/components/sidebar';
-import { Form, Link } from 'react-router';
+import { useNavigate } from 'react-router-dom';
+import { useAuthDataStore } from '../../store/auth-store';
 
 export function NavUser({
   user,
@@ -29,6 +29,13 @@ export function NavUser({
     | any;
 }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+  const { logout } = useAuthDataStore();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <SidebarMenu>
@@ -40,10 +47,13 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage alt={user.name} />
                 <AvatarFallback className="rounded-lg">
-                  {/* {user.username.slice(0, 2)} */}
-                  {user.name.slice(0, 2)}
+                  {user.name
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -62,8 +72,14 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage alt={user.name} />
-                  <AvatarFallback className="rounded-lg">SN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user.name
+                      .split(' ')
+                      .map((n: string) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
@@ -72,41 +88,9 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link to="/settings/account">
-                  <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/settings">
-                  <CreditCard />
-                  Billing
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/settings/notifications">
-                  <Bell />
-                  Notifications
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Form method="POST" action="/logout">
-                <button className="flex items-center gap-2 cursor-pointer" type="submit">
-                  <LogOut />
-                  Log out
-                </button>
-              </Form>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              <LogOut />
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

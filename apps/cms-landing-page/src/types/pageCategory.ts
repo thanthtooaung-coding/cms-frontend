@@ -12,4 +12,5 @@ export interface PageResponse {
     updated: string;
     logo: string;
     stats: { users: string; completion: string };
+    pageUrl?: string | null;
 }

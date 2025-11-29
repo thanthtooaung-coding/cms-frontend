@@ -15,15 +15,46 @@ import {
     ShoppingCart,
     Calendar,
 } from "lucide-react"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import PageRequest from "./PageRequest"
 import { PageCategory, PageResponse } from "../../types/pageCategory"
+
+interface ApiPageData {
+    id: number;
+    title: string | null;
+    imageUrl: string | null;
+    pageUrl: string | null;
+    status: string;
+    owner: {
+        username: string;
+        email: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+}
 
 const Service = () => {
     const gridRef = useRef<HTMLDivElement>(null)
     const [currentPage, setCurrentPage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(6)
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+    const [allCmsOptions, setAllCmsOptions] = useState<PageResponse[]>([])
+    const [loading, setLoading] = useState(true)
+
+    const getCategoryFromUrl = (url: string | null): string => {
+        if (!url) return "Other"
+        
+        const urlLower = url.toLowerCase()
+        if (urlLower.includes('/lms/') || urlLower.includes('lms')) {
+            return "Learning Management System"
+        } else if (urlLower.includes('/bms/') || urlLower.includes('bms') || urlLower.includes('/booking/')) {
+            return "Booking System"
+        } else if (urlLower.includes('/ecommerce/') || urlLower.includes('/ecs-') || urlLower.includes('ecommerce')) {
+            return "E-Commerce System"
+        } else {
+            return "Other"
+        }
+    }
 
     const getCategoryStyle = (category: string, index: number) => {
         const categoryMap: Record<string, PageCategory> = {
@@ -63,80 +94,61 @@ const Service = () => {
         return fallbackColors[index % fallbackColors.length]
     }
 
-    const allCmsOptions: PageResponse[] = [
-        {
-            id: 1,
-            title: "Corporate Hub",
-            category: "Learning Management System",
-            description: "Transform your workforce with intelligent learning paths and real-time progress tracking.",
-            updated: "July 5, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "50K+", completion: "94%" },
-        },
-        {
-            id: 2,
-            title: "Shopify",
-            category: "E-Commerce System",
-            description: "The one-stop shop for all your e-commerce needs.",
-            updated: "July 3, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "1M+", completion: "92%" },
-        },
-        {
-            id: 3,
-            title: "OpenTable",
-            category: "Booking System",
-            description: "The world's leading provider of online restaurant reservations.",
-            updated: "July 2, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "100M+", completion: "98%" },
-        },
-        {
-            id: 4,
-            title: "HubSpot",
-            category: "Agency Management System",
-            description: "A full platform of marketing, sales, customer service, and CRM software.",
-            updated: "July 4, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "150K+", completion: "95%" },
-        },
-        {
-            id: 5,
-            title: "Corporate Hub",
-            category: "Learning Management System",
-            description: "Transform your workforce with intelligent learning paths and real-time progress tracking.",
-            updated: "July 5, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "50K+", completion: "94%" },
-        },
-        {
-            id: 6,
-            title: "Shopify",
-            category: "E-Commerce System",
-            description: "The one-stop shop for all your e-commerce needs.",
-            updated: "July 3, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "1M+", completion: "92%" },
-        },
-        {
-            id: 7,
-            title: "OpenTable",
-            category: "Booking System",
-            description: "The world's leading provider of online restaurant reservations.",
-            updated: "July 2, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "100M+", completion: "98%" },
-        },
-        {
-            id: 8,
-            title: "HubSpot",
-            category: "Agency Management System",
-            description: "A full platform of marketing, sales, customer service, and CRM software.",
-            updated: "July 4, 2025",
-            logo: "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
-            stats: { users: "150K+", completion: "95%" },
-        },
-    ]
+    useEffect(() => {
+        const fetchPages = async () => {
+            try {
+                setLoading(true)
+                const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001/api'
+                const response = await fetch(`${API_BASE_URL}/cms/pages?page=1&limit=100`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch pages')
+                }
+
+                const result = await response.json()
+                // Filter only published pages and map to PageResponse format
+                const publishedPages = (result.data || [])
+                    .filter((page: ApiPageData) => page.status === 'Published' && page.pageUrl)
+                    .map((page: ApiPageData) => {
+                        const category = getCategoryFromUrl(page.pageUrl)
+                        const updatedDate = new Date(page.updatedAt || page.createdAt)
+                        const formattedDate = updatedDate.toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                        })
+                        
+                        return {
+                            id: page.id,
+                            title: page.title || "Untitled Service",
+                            category: category,
+                            description: page.owner?.username 
+                                ? `Managed by ${page.owner.username}. Professional ${category.toLowerCase()} platform.`
+                                : `Professional ${category.toLowerCase()} platform.`,
+                            updated: formattedDate,
+                            logo: page.imageUrl || "https://i.pinimg.com/736x/48/06/7f/48067f233fdfc65f3c73dd166af75e39.jpg",
+                            stats: { users: "1K+", completion: "95%" }, // Default stats, can be enhanced later
+                            pageUrl: page.pageUrl,
+                        } as PageResponse
+                    })
+                
+                setAllCmsOptions(publishedPages)
+            } catch (error) {
+                console.error('Error fetching pages:', error)
+                // Keep empty array on error
+                setAllCmsOptions([])
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchPages()
+    }, [])
 
     const totalPages = Math.ceil(allCmsOptions.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -184,6 +196,12 @@ const Service = () => {
         }
     }
 
+    const handleExploreLive = (platform: PageResponse) => {
+        if (platform.pageUrl) {
+            window.open(platform.pageUrl, '_blank', 'noopener,noreferrer')
+        }
+    }
+
     return (
         <div id="services" className="min-h-screen bg-white">
             <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-purple-50 py-20 px-4">
@@ -214,14 +232,23 @@ const Service = () => {
             </div>
 
             <div ref={gridRef} className="max-w-7xl mx-auto px-4 py-8">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-                    <div className="flex items-center gap-4">
-                        <p className="text-gray-600">
-                            Showing <span className="font-semibold">{startIndex + 1}</span> to{" "}
-                            <span className="font-semibold">{Math.min(endIndex, allCmsOptions.length)}</span> of{" "}
-                            <span className="font-semibold">{allCmsOptions.length}</span> platforms
-                        </p>
+                {loading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                            <p className="text-gray-600">Loading platforms...</p>
+                        </div>
                     </div>
+                ) : (
+                    <>
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                            <div className="flex items-center gap-4">
+                                <p className="text-gray-600">
+                                    Showing <span className="font-semibold">{startIndex + 1}</span> to{" "}
+                                    <span className="font-semibold">{Math.min(endIndex, allCmsOptions.length)}</span> of{" "}
+                                    <span className="font-semibold">{allCmsOptions.length}</span> platform{allCmsOptions.length !== 1 ? 's' : ''}
+                                </p>
+                            </div>
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
@@ -259,11 +286,10 @@ const Service = () => {
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="max-w-7xl mx-auto px-4 pb-16">
-                <div className={`grid gap-8 ${viewMode === "grid" ? "lg:grid-cols-2" : "grid-cols-1"}`}>
-                    {currentItems.map((platform, index) => {
+                <div className="max-w-7xl mx-auto px-4 pb-16">
+                    <div className={`grid gap-8 ${viewMode === "grid" ? "lg:grid-cols-2" : "grid-cols-1"}`}>
+                        {currentItems.map((platform, index) => {
                         const categoryStyle = getCategoryStyle(platform.category, index)
 
                         const isEven = index % 2 === 0
@@ -329,7 +355,8 @@ const Service = () => {
                                         </div>
 
                                         <button
-                                            className={`group/btn relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${categoryStyle.colors} text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg`}
+                                            onClick={() => handleExploreLive(platform)}
+                                            className={`group/btn relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${categoryStyle.colors} text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer`}
                                         >
                                             <span>Explore Live</span>
                                             <ArrowUpRight className="w-5 h-5 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" />
@@ -419,6 +446,9 @@ const Service = () => {
                         />
                     </div>
                 </div>
+                </div>
+                </>
+                )}
             </div>
 
             <PageRequest />

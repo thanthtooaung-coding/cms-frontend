@@ -20,7 +20,7 @@ const PageListsApp = () => {
   const formattedData: PageList[] = (validatedData || []).map((item) => ({
     id: item.id.toString(),
     pageName: item.title,
-    pageUrl: item.pageUrl || `/page/${item.id}`,
+    pageUrl: item.pageUrl || '',
     ownerName: item.owner.username,
     ownerEmail: item.owner.email,
     pageStatus: item.status,
