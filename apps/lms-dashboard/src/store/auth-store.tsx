@@ -27,7 +27,8 @@ export const useAuthDataStore = create<AuthState>()(
         set({ user: null });
         localStorage.removeItem('lms_token');
         localStorage.removeItem('tenant_id');
-        localStorage.removeItem('tenant_slug');
+        // Keep tenant_slug in localStorage so it can be used after logout
+        // It will be preserved in the URL path anyway
       },
       isAuthenticated: () => {
         const state = get();

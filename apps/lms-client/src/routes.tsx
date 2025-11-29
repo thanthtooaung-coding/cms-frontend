@@ -25,7 +25,8 @@ export const router = createBrowserRouter([
       {
         path : "",
         index: true,
-        element : <HomePage/>
+        element : <HomePage/>,
+        // HomePage will be protected by RootLayout auth check
       },
       {
         path: "my-learning", 
@@ -67,7 +68,8 @@ export const router = createBrowserRouter([
     children: [
       {
         path : "/",
-        element : <HomePage/>
+        element : <HomePage/>,
+        // HomePage will be protected by RootLayout auth check
       },
       {
         path: "my-learning", 

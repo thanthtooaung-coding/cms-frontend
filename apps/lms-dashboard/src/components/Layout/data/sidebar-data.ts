@@ -1,9 +1,7 @@
 import {
-  IconFileAnalytics,
   IconHelp,
   IconLayoutDashboard,
   IconSettings,
-  IconTool,
   IconUserCog,
   IconBook,
   IconTags,
@@ -21,11 +19,6 @@ export const sidebarData: SidebarData = {
           title: 'Dashboard',
           url: '/',
           icon: IconLayoutDashboard,
-        },
-        {
-          title: 'Report',
-          url: '/report',
-          icon: IconFileAnalytics,
         },
         {
           title: 'Instructor',
@@ -60,11 +53,6 @@ export const sidebarData: SidebarData = {
               title: 'Profile',
               url: '/settings',
               icon: IconUserCog,
-            },
-            {
-              title: 'Account',
-              url: '/settings/account',
-              icon: IconTool,
             },
           ],
         },

@@ -1,6 +1,6 @@
 
 import { Mail, BookOpen, Users } from "lucide-react";
-import { Avatar, AvatarImage } from "@cms/ui/components/avatar";
+import { Avatar, AvatarFallback } from "@cms/ui/components/avatar";
 import { Link, useParams } from "react-router";
 import { useCourseStore } from "../store/course-store";
 
@@ -15,11 +15,17 @@ const InstructorSection = () => {
 
   const title = "Instructor";
   const type = "Professional Instructor";
-  const photoUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${instructor.name}`;
   const name = instructor.name;
   const email = instructor.email;
   const coursesCount = instructor.totalCourses || 0;
   const studentsCount = instructor.totalStudents || 0;
+  
+  // Generate initials from name
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase();
 
   const basePath = tenantSlug ? `/lms/${tenantSlug}` : '';
   const teacherPath = `${basePath}/teacher/${instructor.id}`;
@@ -38,7 +44,9 @@ const InstructorSection = () => {
 
       <div className="flex items-center pt-3 space-x-6">
         <Avatar className="w-34 h-34">
-          <AvatarImage src={photoUrl} alt={`${name} photo`} />
+          <AvatarFallback className="text-lg font-semibold">
+            {initials}
+          </AvatarFallback>
         </Avatar>
 
         <div className="flex flex-col space-y-2 text-sm">

@@ -15,11 +15,47 @@ import { ScrollArea } from '@cms/ui/components/scroll-area';
 import { useTenantNavigate } from '../hooks/useTenantNavigate';
 import { useSearch } from '../context/search-context';
 import { sidebarData } from './Layout/data/sidebar-data';
+import { useAuthDataStore } from '../store/auth-store';
+
+// Filter sidebar items based on user role (same logic as AppSidebar)
+const filterSidebarByRole = (navGroups: typeof sidebarData.navGroups, role?: string) => {
+  // Instructor and Staff have the same permissions - can only see Dashboard, Course, and Enrollment
+  const restrictedRoles = ['Instructor', 'Staff'];
+  
+  if (!role || !restrictedRoles.includes(role)) {
+    // Admin, Owner see all items
+    return navGroups;
+  }
+
+  // Instructor and Staff can only see Dashboard, Course, and Enrollment
+  return navGroups.map((group) => {
+    if (group.title === 'General') {
+      return {
+        ...group,
+        items: group.items.filter((item) => {
+          const url = 'url' in item ? item.url : undefined;
+          return (
+            url === '/' || // Dashboard
+            url === '/course' || // Course
+            url === '/enrollment' // Enrollment
+          );
+        }),
+      };
+    }
+    // Keep "Other" group (Settings, Help Center)
+    return group;
+  });
+};
 
 export function CommandMenu() {
   const navigate = useTenantNavigate();
-
+  const { user } = useAuthDataStore();
   const { open, setOpen } = useSearch();
+
+  // Filter sidebar items based on role
+  const filteredSidebarData = React.useMemo(() => {
+    return filterSidebarByRole(sidebarData.navGroups, user?.roleName || user?.role);
+  }, [user?.roleName, user?.role]);
 
   const runCommand = React.useCallback(
     (command: () => unknown) => {
@@ -35,7 +71,7 @@ export function CommandMenu() {
       <CommandList>
         <ScrollArea type="hover" className="h-72 pr-1">
           <CommandEmpty>No results found.</CommandEmpty>
-          {sidebarData.navGroups.map((group) => (
+          {filteredSidebarData.map((group) => (
             <CommandGroup key={group.title} heading={group.title}>
               {group.items.map((navItem, i) => {
                 if (navItem.url)

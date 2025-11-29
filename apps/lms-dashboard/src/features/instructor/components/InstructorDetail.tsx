@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cms/
 import { Badge } from '@cms/ui/components/badge';
 import { Button } from '@cms/ui/components/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cms/ui/components/tabs';
-import { Avatar, AvatarImage, AvatarFallback } from '@cms/ui/components/avatar';
+import { Avatar, AvatarFallback } from '@cms/ui/components/avatar';
 import { 
   ArrowLeft, 
   Mail, 
@@ -46,6 +46,8 @@ interface TeacherResponse {
     id: number;
     name: string;
   };
+  totalCourses?: number;
+  totalStudents?: number;
 }
 
 interface CourseResponse {
@@ -160,7 +162,7 @@ const InstructorDetail = () => {
   }
 
   // Calculate statistics
-  const totalStudents = courses.length * 100; // Placeholder - would need enrollment data
+  const totalStudents = teacher.totalStudents ?? 0; // Use actual count from backend
   const averageRating = 4.7; // Placeholder - would need course ratings
 
   return (
@@ -201,10 +203,6 @@ const InstructorDetail = () => {
             <CardHeader>
               <div className="flex items-start gap-6">
                 <Avatar className="w-24 h-24">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${teacher.name}`}
-                    alt={teacher.name}
-                  />
                   <AvatarFallback className="text-2xl">
                     {teacher.name
                       .split(' ')
@@ -225,7 +223,7 @@ const InstructorDetail = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <BookOpen className="w-4 h-4" />
-                      <span>{courses.length} Courses</span>
+                      <span>{teacher.totalCourses ?? courses.length} Courses</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4" />
@@ -252,7 +250,7 @@ const InstructorDetail = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{courses.length}</div>
+                        <div className="text-2xl font-bold">{teacher.totalCourses ?? courses.length}</div>
                       </CardContent>
                     </Card>
                     <Card>

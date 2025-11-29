@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { Mail, BookOpen, Users, MapPin, Phone, ArrowLeft, GraduationCap } from 'lucide-react';
-import { Avatar, AvatarImage, AvatarFallback } from '@cms/ui/components/avatar';
+import { Avatar, AvatarFallback } from '@cms/ui/components/avatar';
 import { Card, CardContent } from '@cms/ui/components/card';
 import { Button } from '@cms/ui/components/button';
 import { fetchTeacherById, fetchCoursesByInstructor, type TeacherResponse, type CourseResponse } from '../api/teacherApi';
@@ -135,10 +135,6 @@ const TeacherDetail = () => {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
               <div className="flex-shrink-0 mx-auto sm:mx-0">
                 <Avatar className="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 border-4 border-white shadow-xl ring-4 ring-white/20">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${teacher.name}`}
-                    alt={teacher.name}
-                  />
                   <AvatarFallback className="text-2xl sm:text-3xl bg-purple-500 text-white font-bold">
                     {teacher.name
                       .split(' ')

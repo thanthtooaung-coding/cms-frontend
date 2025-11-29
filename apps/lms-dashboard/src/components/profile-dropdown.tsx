@@ -3,22 +3,30 @@ import { Button } from '@cms/ui/components/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@cms/ui/components/dropdown-menu';
-import { Form, Link } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTenantUrl } from '../hooks/useTenantNavigate';
-// import { useAuthDataStore } from '../store/auth-store';
+import { useAuthDataStore } from '../store/auth-store';
 
 export function ProfileDropdown() {
   const getTenantUrl = useTenantUrl();
-  const user = {
-    name: 'Brian',
-    email: 'Brian@gmail.com',
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams<{ tenantSlug?: string }>();
+  const { user, logout } = useAuthDataStore();
+
+  const handleLogout = () => {
+    logout();
+    // Navigate to login page with tenant slug preserved
+    if (tenantSlug) {
+      navigate(`/lms/${tenantSlug}/login`, { replace: true });
+    } else {
+      navigate('/login', { replace: true });
+    }
   };
   return (
     <DropdownMenu modal={false}>
@@ -38,35 +46,16 @@ export function ProfileDropdown() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link to={getTenantUrl('settings')}>
-              Profile
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to={getTenantUrl('settings')}>
-              Billing
-              <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to={getTenantUrl('settings')}>
-              Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Form method="POST" action="/logout">
-            <button type="submit">
-              Log out
-              <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-            </button>
-          </Form>
+          <Link to={getTenantUrl('settings')}>
+            Profile
+            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+          Log out
+          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

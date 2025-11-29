@@ -42,6 +42,7 @@ export const TenantProvider = ({ children }: TenantProviderProps) => {
   useEffect(() => {
     if (!tenantSlug) {
       setTenantInfo(null);
+      document.title = 'LMS';
       return;
     }
 
@@ -59,12 +60,15 @@ export const TenantProvider = ({ children }: TenantProviderProps) => {
         const result = await response.json();
         if (result.success && result.data) {
           setTenantInfo(result.data);
+          // Update page title with tenant name
+          document.title = result.data.tenantName || 'LMS';
         } else {
           throw new Error(result.message || 'Failed to fetch tenant info');
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch tenant info');
         console.error('Error fetching tenant info:', err);
+        document.title = 'LMS';
       } finally {
         setLoading(false);
       }

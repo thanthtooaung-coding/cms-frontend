@@ -48,20 +48,23 @@ export function useTenantUrl() {
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
 
   const getTenantUrl = (path: string): string => {
-    if (!tenantSlug) return path;
+    if (!tenantSlug) {
+      // If no tenant slug, ensure path starts with /
+      return path.startsWith('/') ? path : `/${path}`;
+    }
 
     // If path is already tenant-aware, return as is
     if (path.startsWith(`/lms/${tenantSlug}`)) {
       return path;
     }
 
-    // If path is absolute (starts with /), prepend /lms/tenantSlug
+    // If path is absolute (starts with /) but not tenant-aware, prepend tenant prefix
     if (path.startsWith('/')) {
       return `/lms/${tenantSlug}${path}`;
     }
 
-    // Relative paths work as-is
-    return path;
+    // For relative paths, prepend tenant prefix with /
+    return `/lms/${tenantSlug}/${path}`;
   };
 
   return getTenantUrl;

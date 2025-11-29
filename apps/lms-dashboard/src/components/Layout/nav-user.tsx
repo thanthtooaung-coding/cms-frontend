@@ -1,9 +1,8 @@
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { ChevronsUpDown, LogOut, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@cms/ui/components/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -15,8 +14,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@cms/ui/components/sidebar';
-import { Form, Link } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTenantUrl } from '../../hooks/useTenantNavigate';
+import { useAuthDataStore } from '../../store/auth-store';
 
 export function NavUser({
   user,
@@ -31,6 +31,19 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const getTenantUrl = useTenantUrl();
+  const navigate = useNavigate();
+  const { tenantSlug } = useParams<{ tenantSlug?: string }>();
+  const { logout } = useAuthDataStore();
+
+  const handleLogout = () => {
+    logout();
+    // Navigate to login page with tenant slug preserved
+    if (tenantSlug) {
+      navigate(`/lms/${tenantSlug}/login`, { replace: true });
+    } else {
+      navigate('/login', { replace: true });
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -74,41 +87,16 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link to={getTenantUrl('settings/account')}>
-                  <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={getTenantUrl('settings')}>
-                  <CreditCard />
-                  Billing
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to={getTenantUrl('settings/notifications')}>
-                  <Bell />
-                  Notifications
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Form method="POST" action="/logout">
-                <button className="flex items-center gap-2 cursor-pointer" type="submit">
-                  <LogOut />
-                  Log out
-                </button>
-              </Form>
+              <Link to={getTenantUrl('settings')}>
+                <User />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              <LogOut />
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

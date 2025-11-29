@@ -6,12 +6,14 @@ import { EnrollmentLoader } from './router/loader/data-loader';
 import { CourseLoader } from './router/loader/data-loader';
 import CreateInstructor from './features/instructor/components/CreateInstructor';
 import { RoleProtectedRoute } from './components/RoleProtectedRoute';
+import { NotFound } from './components/NotFound';
 
 const Dashboard = lazy(() => import('./features/dashboard/app'));
 const CourseApp = lazy(() => import('./features/course/app'));
 const Category = lazy(() => import('./features/category/app'));
 const Instructor = lazy(() => import('./features/instructor/app'));
 const Enrollment = lazy(() => import('./features/enrollment/app'));
+const Settings = lazy(() => import('./features/settings/app'));
 const CourseDetail = lazy(() => import('./features/course/components/CourseDetail'));
 const CreateCategory = lazy(() => import('./features/category/components/CreateCategory'));
 const EditCategory = lazy(() => import('./features/category/components/EditCategory'));
@@ -144,6 +146,18 @@ export const router = createBrowserRouter([
             element: <p>Edit Enrollment</p>,
           },
         ],
+      },
+      {
+        path: 'settings',
+        element: withSuspense(Settings),
+      },
+      {
+        path: 'help-center',
+        element: <NotFound />,
+      },
+      {
+        path: '*',
+        element: <NotFound />,
       },
     ],
   },
