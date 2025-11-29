@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Clexitix Movie Platform Design System */
+
+@layer base {
+  :root {
+    /* CELESTIX Black & Light Purple Theme */
+    --background: 0 0% 5%;
+    --foreground: 270 30% 90%;
+
+    --card: 270 20% 12%;
+    --card-foreground: 270 30% 90%;
+
+    --popover: 270 20% 12%;
+    --popover-foreground: 270 30% 90%;
+
+    --primary: 270 40% 70%;
+    --primary-foreground: 0 0% 5%;
+
+    --secondary: 270 15% 15%;
+    --secondary-foreground: 270 30% 90%;
+
+    --muted: 270 10% 20%;
+    --muted-foreground: 270 20% 65%;
+
+    --accent: 270 40% 70%;
+    --accent-foreground: 0 0% 5%;
+
+    --success: 142 72% 29%;
+    --success-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 270 25% 25%;
+    --input: 270 15% 18%;
+    --ring: 270 40% 70%;
+
+    --radius: 0.75rem;
+
+    /* Cinema gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(0 0% 5%), hsl(270 20% 12%));
+    --gradient-card: linear-gradient(145deg, hsl(270 20% 12% / 0.8), hsl(0 0% 5% / 0.9));
+    --gradient-accent: linear-gradient(135deg, hsl(270 40% 70%), hsl(270 35% 65%));
+    --gradient-cinema: linear-gradient(180deg, hsl(0 0% 5%) 0%, hsl(270 15% 10%) 100%);
+    
+    /* Movie platform shadows */
+    --shadow-glow: 0 0 40px hsl(270 40% 70% / 0.4);
+    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.6);
+    --shadow-movie: 0 10px 30px -10px hsl(270 40% 70% / 0.3);
+
+    /* Smooth transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background: var(--gradient-primary);
+    min-height: 100vh;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-xl bg-card/40 border border-border/50;
+    box-shadow: var(--shadow-card);
+  }
+
+  .gradient-text {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .floating-elements::before {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: hsl(180 100% 40% / 0.1);
+    border-radius: 50%;
+    top: 10%;
+    left: 10%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-elements::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: hsl(240 80% 60% / 0.1);
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    top: 60%;
+    right: 10%;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(10deg); }
+  }
+
+  .chart-gradient {
+    background: linear-gradient(180deg, hsl(180 100% 40% / 0.3), hsl(180 100% 40% / 0.1));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
