@@ -134,7 +134,7 @@ const RegisterStepTwo = () => {
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 rounded-full mb-4">
           <Sparkles className="w-4 h-4 text-indigo-600" />
-          <span className="text-sm font-medium text-indigo-700">Step 2 of 5</span>
+          <span className="text-sm font-medium text-indigo-700">Step 2 of 2</span>
         </div>
         <h1 className="text-3xl font-bold text-slate-800 mb-3">Welcome to ContentFlow</h1>
         <p className="text-slate-600 text-lg">Let's start by getting to know you better</p>

@@ -2,9 +2,6 @@ import {
   Building2,
   Check,
   User,
-  Mail,
-  Shield,
-  CheckCircle,
   Sparkles,
   ChevronRight,
 } from 'lucide-react';
@@ -29,24 +26,6 @@ const onboardingSteps = [
     description: 'Choose your role and create your account',
     path: '/onboarding/create-account',
     icon: Building2,
-  },
-  {
-    label: 'Verify Email',
-    description: 'Check your inbox for a verification link',
-    path: '/onboarding/verify-email',
-    icon: Mail,
-  },
-  {
-    label: 'Two Factor Setup',
-    description: 'Set up Two Factor Authentication for security',
-    path: '/onboarding/mfa-setup',
-    icon: Shield,
-  },
-  {
-    label: 'Verify Account',
-    description: 'Verify your account with two factor',
-    path: '/onboarding/mfa-verify',
-    icon: CheckCircle,
   },
 ];
 
