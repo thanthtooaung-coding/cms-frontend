@@ -85,8 +85,8 @@ export default function PageRequestForm() {
         shouldValidate: true,
       });
     } else if (watchedRequestType === 'Booking System') {
-      const sanitizedTitle = watchedTitle.replace(/\s+/g, '');
-      form.setValue('pageUrl', `http://localhost:5180/booking/${sanitizedTitle}`, {
+      const sanitizedTitle = watchedTitle.trim().toLowerCase().replace(/\s+/g, '-');
+      form.setValue('pageUrl', `http://localhost:5177/bms/${sanitizedTitle}`, {
         shouldValidate: true,
       });
     } else if (watchedRequestType === 'Agency Management System') {
